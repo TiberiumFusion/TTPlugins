@@ -19,7 +19,7 @@ namespace com.tiberiumfusion.ttplugins
         /// <summary>
         /// The Harmony instance which was created during patch application
         /// </summary>
-        public static HarmonyLib.Harmony HarmonyInstance { get; private set; }
+        internal static HarmonyLib.Harmony HarmonyInstance { get; private set; }
 
         /// <summary>
         /// A list of all HPlugins that were successfully applied.
@@ -52,7 +52,7 @@ namespace com.tiberiumfusion.ttplugins
         #region Assembly Resolver
 
         // Fixes bizarre problems with dynamically loaded assemblies missing all their types and fields because the CLR couldnt "find" the correct assembly
-        public static void SetupDomainAssemblyResolver()
+        internal static void SetupDomainAssemblyResolver()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
@@ -61,7 +61,7 @@ namespace com.tiberiumfusion.ttplugins
         // 1. The CLR doesnt know where an Assembly is, so it gives us its full name.
         // 2. We find the loaded assembly that has that full name and give it to the CLR.
         // 3. The CLR is baffled by how well we solved this incredibly complex problem and things work again.
-        public static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        internal static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             var domain = (AppDomain)sender;
 
@@ -289,7 +289,7 @@ namespace com.tiberiumfusion.ttplugins
         /// Asynchronously writes the specified HPlugin's Configuration property to disk. Is typically called by HPlugins when their usercode logic wants to save the Configuration.
         /// </summary>
         /// <param name="plugin"></param>
-        public static void WriteConfigurationForHPatch(HPlugin plugin)
+        internal static void WriteConfigurationForHPatch(HPlugin plugin)
         {
             Task.Run(() =>
             {
