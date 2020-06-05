@@ -5,8 +5,8 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A01762B1-4E94-44E0-B4D6-E81949CC09D9}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>TTPlugins</RootNamespace>
+    <OutputType>Library</OutputType>
+    <RootNamespace>com.tiberiumfusion.ttplugins</RootNamespace>
     <AssemblyName>TTPlugins</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -32,7 +32,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\..\..\VS Resources\Harmony.2.0.1.0\Release\net45\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,11 +49,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="HHelpers.cs" />
+    <Compile Include="HPatchLocation.cs" />
+    <Compile Include="HPatchOperation.cs" />
+    <Compile Include="HPlugin.cs" />
+    <Compile Include="HPluginApplicator.cs" />
+    <Compile Include="HPluginApplicatorConfiguration.cs" />
+    <Compile Include="HPluginApplicatorResult.cs" />
+    <Compile Include="HPluginAssemblyCompiler.cs" />
+    <Compile Include="HPluginCompilationConfiguration.cs" />
+    <Compile Include="HPluginCompilationResult.cs" />
+    <Compile Include="HPluginConfiguration.cs" />
+    <Compile Include="HPluginIdentity.cs" />
+    <Compile Include="HSupervisedPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
