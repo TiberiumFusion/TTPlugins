@@ -286,7 +286,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
 
         /// <summary>
-        /// Asynchronously writes the specified HPlugin's Configuration property to disk. Is typically called by HPlugins when their usercode logic wants to save the Configuration.
+        /// Asynchronously writes the specified HPlugin's Configuration property to disk. Is typically called by HPlugins when their usercode logic wants to save their Configuration's current Savedata.
         /// </summary>
         /// <param name="plugin"></param>
         internal static void WriteConfigurationForHPatch(HPlugin plugin)

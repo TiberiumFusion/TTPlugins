@@ -25,12 +25,12 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public List<HPatchOperation> PatchOperations { get; protected set; }
 
         /// <summary>
-        /// Contains the plugin's pesistent savedata, which includes user preferences (if any).
+        /// Contains the plugin's pesistent savedata, which includes user preferences from savedata (if any).
         /// </summary>
-        public HPluginConfiguration Configuration { get; set;}
+        public HPluginConfiguration Configuration { get; set; }
 
         /// <summary>
-        /// Whether or not this plugin needs to write persistent savedata to disk (such as user preferences).
+        /// Whether or not this plugin needs to write persistent savedata to disk (such as for user preferences).
         /// </summary>
         public bool HasPersistentData { get; protected set; }
 
