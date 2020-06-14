@@ -7,14 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace com.tiberiumfusion.ttplugins
+namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
     /// Handles the application of HPlugins as Harmony patches.
     /// </summary>
     public static class HPluginApplicator
     {
-        #region Properties
+        #region Vars
 
         /// <summary>
         /// The Harmony instance which was created during patch application
@@ -27,17 +27,17 @@ namespace com.tiberiumfusion.ttplugins
         internal static List<HSupervisedPlugin> AppliedHPlugins { get; private set; }
 
         /// <summary>
-        /// Dictionary that maps each HPlugin to the HSupervisedPlugin object that manages it
+        /// Dictionary that maps each HPlugin to the HSupervisedPlugin object that manages it.
         /// </summary>
         private static Dictionary<HPlugin, HSupervisedPlugin> HPluginToSupervised = new Dictionary<HPlugin, HSupervisedPlugin>();
 
         /// <summary>
-        /// The HPluginApplicatorConfiguration used in the last ApplyPatches() call
+        /// The HPluginApplicatorConfiguration used in the last ApplyPatches() call.
         /// </summary>
         private static HPluginApplicatorConfiguration LastConfiguation;
 
         /// <summary>
-        /// List of namespaces which HPlugins are not allowed to patch
+        /// List of namespaces which HPlugins are not allowed to patch.
         /// </summary>
         private static List<string> ProtectedNamespaces = new List<string>()
         {
@@ -78,7 +78,7 @@ namespace com.tiberiumfusion.ttplugins
         #region Patch Application
 
         /// <summary>
-        /// Applies all HPlugins from the provided compiled assemblies
+        /// Applies all HPlugins from the provided compiled assemblies.
         /// </summary>
         public static HPluginApplicatorResult ApplyPatches(HPluginApplicatorConfiguration configuration)
         {
@@ -106,7 +106,7 @@ namespace com.tiberiumfusion.ttplugins
             // Create a harmony instance
             try
             {
-                HarmonyInstance = new HarmonyLib.Harmony("com.tiberiumfusion.ttplugins.HPluginApplicator");
+                HarmonyInstance = new HarmonyLib.Harmony("com.tiberiumfusion.ttplugins.HarmonyPlugins.HPluginApplicator");
             }
             catch (Exception e)
             {
@@ -159,7 +159,6 @@ namespace com.tiberiumfusion.ttplugins
                             // Try to load the plugin configuration from the disk
                             try
                             {
-                                // This File operation is ok, because TTApplicator will allow access to the plugin savedata path when creating the slave AppDomain
                                 string savedataFile = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, configuration);
                                 if (File.Exists(savedataFile)) // Load config if it exists
                                 {
@@ -200,6 +199,7 @@ namespace com.tiberiumfusion.ttplugins
                         }
 
                         // Now that the plugin is initialized and configured, it is finally time to patch it in with Harmony
+                        // Do all the patch operations defined by the plugin (should have been done by the user in Initialize() or Configure())
                         foreach (HPatchOperation patchOp in supervisedPlugin.Plugin.PatchOperations)
                         {
                             // First validate the patchOp

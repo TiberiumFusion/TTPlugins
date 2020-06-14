@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace com.tiberiumfusion.ttplugins
+namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
     /// Contains configuration data for an HPlugin, such as user preferences.

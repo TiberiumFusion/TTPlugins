@@ -39,6 +39,9 @@
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\..\..\VS Resources\Harmony.2.0.1.0\Release\net45\0Harmony.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\Libraries\Mono.Cecil.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,20 +52,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HHelpers.cs" />
-    <Compile Include="HPatchLocation.cs" />
-    <Compile Include="HPatchOperation.cs" />
-    <Compile Include="HPlugin.cs" />
-    <Compile Include="HPluginApplicator.cs" />
-    <Compile Include="HPluginApplicatorConfiguration.cs" />
-    <Compile Include="HPluginApplicatorResult.cs" />
-    <Compile Include="HPluginAssemblyCompiler.cs" />
-    <Compile Include="HPluginCompilationConfiguration.cs" />
-    <Compile Include="HPluginCompilationResult.cs" />
-    <Compile Include="HPluginConfiguration.cs" />
-    <Compile Include="HPluginIdentity.cs" />
-    <Compile Include="HSupervisedPlugin.cs" />
+    <Compile Include="HarmonyPlugins\HHelpers.cs" />
+    <Compile Include="HarmonyPlugins\HPatchLocation.cs" />
+    <Compile Include="HarmonyPlugins\HPatchOperation.cs" />
+    <Compile Include="HarmonyPlugins\HPlugin.cs" />
+    <Compile Include="HarmonyPlugins\HPluginApplicator.cs" />
+    <Compile Include="HarmonyPlugins\HPluginApplicatorConfiguration.cs" />
+    <Compile Include="HarmonyPlugins\HPluginApplicatorResult.cs" />
+    <Compile Include="HarmonyPlugins\HPluginAssemblyCompiler.cs" />
+    <Compile Include="HarmonyPlugins\HPluginCompilationConfiguration.cs" />
+    <Compile Include="HarmonyPlugins\HPluginCompilationResult.cs" />
+    <Compile Include="HarmonyPlugins\HPluginConfiguration.cs" />
+    <Compile Include="HarmonyPlugins\HPluginIdentity.cs" />
+    <Compile Include="HarmonyPlugins\HSupervisedPlugin.cs" />
+    <Compile Include="Management\IO.cs" />
+    <Compile Include="Management\PluginFile.cs" />
+    <Compile Include="Management\PluginFileType.cs" />
+    <Compile Include="Management\SecurityComplianceCecilTests.cs" />
+    <Compile Include="Management\SecurityComplianceSingleTestResult.cs" />
+    <Compile Include="Management\SecurityLevelComplianceTestResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

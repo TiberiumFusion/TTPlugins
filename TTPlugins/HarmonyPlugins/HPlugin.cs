@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.tiberiumfusion.ttplugins
+namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
     /// The base class which provides the means to create a Harmony-based plugin.

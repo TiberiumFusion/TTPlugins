@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.tiberiumfusion.ttplugins
+namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
     /// A bundle of data produced by HPluginAssemblyCompiler.Compile()

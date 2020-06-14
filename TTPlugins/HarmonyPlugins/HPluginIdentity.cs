@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.tiberiumfusion.ttplugins
+namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
     /// Informational class which describes an HPlugin's identity.

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.tiberiumfusion.ttplugins
+namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
     /// Provides configuration data for the HPluginApplicator.
@@ -29,7 +29,7 @@ namespace com.tiberiumfusion.ttplugins
         public List<byte[]> AllUsercodeAssemblies { get; set; } = new List<byte[]>();
 
         /// <summary>
-        /// Directory where plugin savedata is stored.
+        /// Directory where temporary plugin savedata is stored.
         /// </summary>
         public string RootPluginSavedataPath { get; set; }
     }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.tiberiumfusion.ttplugins
+namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
     /// The configuration used to compile usercode HPlugins into assemblies.
@@ -21,5 +21,17 @@ namespace com.tiberiumfusion.ttplugins
         /// If false, each source file will be compiled into its own assembly.
         /// </summary>
         public bool SingleAssemblyOutput { get; set; } = false;
+
+        /// <summary>
+        /// List of paths to all references needed for plugin compilation (i.e. Terraria.exe and its extracted dependencies).
+        /// Must be file paths on the disk, since CodeDom cannot use in-memory assemblies.
+        /// </summary>
+        public List<string> ReferencesOnDisk { get; set; } = new List<string>();
+
+        /// <summary>
+        /// List of all references that are in memory.
+        /// HPluginAssemblyCompiler.Compile() will write these to a temporary folder, then delete them once the output assembly is compiled.
+        /// </summary>
+        public List<byte[]> ReferencesInMemory { get; set; } = new List<byte[]>();
     }
 }
