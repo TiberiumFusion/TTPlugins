@@ -28,10 +28,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public static HPluginCompilationResult Compile(HPluginCompilationConfiguration configuration)
         {
             HPluginCompilationResult result = new HPluginCompilationResult();
-
-            // List of paths to dlls that were written to disk from memory and should be deleted when compilation is over
-            List<string> temporaryDiskReferenceFiles = new List<string>();
-
+            
             try
             {
                 // Compiler configuration
@@ -44,15 +41,25 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 foreach (string filePath in configuration.ReferencesOnDisk)
                     compilerParams.ReferencedAssemblies.Add(filePath);
                 // References in memory
-                int refAsmNum = 0;
-                foreach (byte[] asmBytes in configuration.ReferencesInMemory)
+                if (configuration.ReuseTemporaryFiles)
                 {
-                    Directory.CreateDirectory(TemporaryFilesPath);
-                    string asmFullPath = Path.Combine(Directory.GetCurrentDirectory(), TemporaryFilesPath, "RefAsm" + refAsmNum + ".dll");
-                    File.WriteAllBytes(asmFullPath, asmBytes);
-                    compilerParams.ReferencedAssemblies.Add(asmFullPath);
-                    temporaryDiskReferenceFiles.Add(asmFullPath);
-                    refAsmNum++;
+                    if (Directory.Exists(TemporaryFilesPath))
+                    {
+                        foreach (string refAsmPath in Directory.GetFiles(TemporaryFilesPath))
+                            compilerParams.ReferencedAssemblies.Add(refAsmPath);
+                    }
+                }
+                else
+                {
+                    int refAsmNum = 0;
+                    foreach (byte[] asmBytes in configuration.ReferencesInMemory)
+                    {
+                        Directory.CreateDirectory(TemporaryFilesPath);
+                        string asmFullPath = Path.Combine(Directory.GetCurrentDirectory(), TemporaryFilesPath, "RefAsm" + refAsmNum + ".dll");
+                        File.WriteAllBytes(asmFullPath, asmBytes);
+                        compilerParams.ReferencedAssemblies.Add(asmFullPath);
+                        refAsmNum++;
+                    }
                 }
 
                 CSharpCodeProvider csProvider = new CSharpCodeProvider();
@@ -76,18 +83,9 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 result.GenericCompilationFailure = true;
             }
 
-            // Clear temporary reference assembly files
-            foreach (string tempFile in temporaryDiskReferenceFiles)
-            {
-                try { File.Delete(tempFile); }
-                catch (Exception e) { } // Swallow it
-            }
-            try
-            {
-                if (Directory.Exists(TemporaryFilesPath))
-                    Directory.Delete(TemporaryFilesPath);
-            }
-            catch (Exception e) { } // Swallow it
+            // Clear temporary reference assembly files if applicable
+            if (configuration.ClearTemporaryFilesWhenDone)
+                ClearTemporaryCompileFiles();
             
             return result;
         }
@@ -103,6 +101,28 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             }
             else
                 result.CompiledAssemblies.Add(compileResult.CompiledAssembly);
+        }
+        
+        /// <summary>
+        /// Deletes all files inside the TemporaryFilesPath directory, then removes the directory.
+        /// </summary>
+        /// <returns>True if no errors occured, false if otherwise.</returns>
+        public static bool ClearTemporaryCompileFiles()
+        {
+            try
+            {
+                if (Directory.Exists(TemporaryFilesPath))
+                {
+                    DirectoryInfo topDirInfo = new DirectoryInfo(TemporaryFilesPath);
+                    topDirInfo.Delete(true);
+                }
+                
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 }

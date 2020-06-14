@@ -30,8 +30,18 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
         /// <summary>
         /// List of all references that are in memory.
-        /// HPluginAssemblyCompiler.Compile() will write these to a temporary folder, then delete them once the output assembly is compiled.
+        /// HPluginAssemblyCompiler.Compile() will write temporary disk copies of these files to a temporary folder for CodeDom to reference.
         /// </summary>
         public List<byte[]> ReferencesInMemory { get; set; } = new List<byte[]>();
+        
+        /// <summary>
+        /// If true, the ReferencesInMemory that were written to temporary diskc copies will be deleted once the compile operation is complete.
+        /// </summary>
+        public bool ClearTemporaryFilesWhenDone { get; set; } = true;
+
+        /// <summary>
+        /// If true, ReferencesInMemory won't be written to temporary disk copies, and the contents of the folder will be re-used instead.
+        /// </summary>
+        public bool ReuseTemporaryFiles { get; set; } = false;
     }
 }

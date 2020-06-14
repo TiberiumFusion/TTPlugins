@@ -1,8 +1,13 @@
-﻿using Mono.Cecil;
+﻿using com.tiberiumfusion.ttplugins.HarmonyPlugins;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,7 +21,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         #region Helpers
 
         /// <summary>
-        /// Helper that checks if the provided single namespace is inside any namespace in the provided list of namespaces.
+        /// Helper that checks if the provided deeper namespace is inside any namespace in the provided list of shallower namespaces.
         /// </summary>
         /// <param name="deeperNamespace">The deeper namespace to test for existence in the shallower namespace(s).</param>
         /// <param name="shallowerNamespaces">The shallower namespace(s) that the deeper namespace may potentially be a part of.</param>
@@ -150,7 +155,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                 MethodReference asMethodReference = ins.Operand as MethodReference;
                                 if (asMethodReference != null)
                                 {
-                                    // Check for use of a nethod declared in a restricted type (e.g. call <restricted type> to do something like Terraria.Main.DoUpdate(); where Terraria.Main is the restricted type)
+                                    // Check for use of a method declared in a restricted type (e.g. call <restricted type> to do something like Terraria.Main.DoUpdate(); where Terraria.Main is the restricted type)
                                     if (restrictedTypes.Contains(asMethodReference.DeclaringType.FullName))
                                     {
                                         pass = false;
@@ -178,7 +183,6 @@ namespace com.tiberiumfusion.ttplugins.Management
 
         #endregion
 
-
         #region Tests
 
         /// <summary>
@@ -186,7 +190,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="asmDef">The assembly to test.</param>
         /// <returns>True if compliant, false if violated something.</returns>
-        public static SecurityComplianceSingleTestResult TestLevel1(AssemblyDefinition asmDef)
+        public static SecurityComplianceSingleCecilTestResult TestLevel1(AssemblyDefinition asmDef)
         {
             List<string> restrictedNamespaces = new List<string>()
             {
@@ -199,7 +203,7 @@ namespace com.tiberiumfusion.ttplugins.Management
 
             TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
             
-            return new SecurityComplianceSingleTestResult(pass, messages);
+            return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
 
         /// <summary>
@@ -207,7 +211,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="asmDef">The assembly to test.</param>
         /// <returns>True if compliant, false if violated something.</returns>
-        public static SecurityComplianceSingleTestResult TestLevel2(AssemblyDefinition asmDef)
+        public static SecurityComplianceSingleCecilTestResult TestLevel2(AssemblyDefinition asmDef)
         {
             List<string> restrictedNamespaces = new List<string>()
             {
@@ -230,7 +234,7 @@ namespace com.tiberiumfusion.ttplugins.Management
             TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
             TestForRestrictedTypes(asmDef, restrictedTypes, ref pass, messages);
 
-            return new SecurityComplianceSingleTestResult(pass, messages);
+            return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
 
         /// <summary>
@@ -238,7 +242,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="asmDef">The assembly to test.</param>
         /// <returns>True if compliant, false if violated something.</returns>
-        public static SecurityComplianceSingleTestResult TestLevel3(AssemblyDefinition asmDef)
+        public static SecurityComplianceSingleCecilTestResult TestLevel3(AssemblyDefinition asmDef)
         {
             List<string> restrictedNamespaces = new List<string>()
             {
@@ -252,7 +256,7 @@ namespace com.tiberiumfusion.ttplugins.Management
 
             TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
 
-            return new SecurityComplianceSingleTestResult(pass, messages);
+            return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
 
         /// <summary>
@@ -260,7 +264,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="asmDef">The assembly to test.</param>
         /// <returns>True if compliant, false if violated something.</returns>
-        public static SecurityComplianceSingleTestResult TestLevel4(AssemblyDefinition asmDef)
+        public static SecurityComplianceSingleCecilTestResult TestLevel4(AssemblyDefinition asmDef)
         {
             List<string> restrictedNamespaces = new List<string>()
             {
@@ -272,9 +276,155 @@ namespace com.tiberiumfusion.ttplugins.Management
 
             TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
 
-            return new SecurityComplianceSingleTestResult(pass, messages);
+            return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
 
         #endregion
+
+        /// <summary>
+        /// Tests PluginFile(s) against all security levels so as to determine the maximum security level that will allow a plugin to function.
+        /// </summary>
+        /// <param name="testConfig">The parameters to be used in this security level compliance test.</param>
+        /// <returns>A SecurityLevelComplianceTestResult object containing the test results.</returns>
+        public static SecurityLevelComplianceTestsResults TestPluginCompliance(SecurityLevelComplianceTestConfiguration testConfig)
+        {
+            SecurityLevelComplianceTestsResults allResults = new SecurityLevelComplianceTestsResults();
+
+            bool firstCompile = true;
+            foreach (PluginFile pluginFile in testConfig.PluginFilesToTest)
+            {
+                SecurityLevelComplianceSingleTestResult singleResult = new SecurityLevelComplianceSingleTestResult(pluginFile);
+
+                try
+                {
+                    byte[] asmBytesToTest = null;
+
+                    // If source file, compile it
+                    if (pluginFile.FileType == PluginFileType.CSSourceFile)
+                    {
+                        HPluginCompilationConfiguration comileConfig = new HPluginCompilationConfiguration();
+                        comileConfig.SingleAssemblyOutput = true;
+                        comileConfig.SourceFiles.Add(pluginFile.PathToFile);
+                        comileConfig.ReferencesOnDisk.Add(testConfig.TerrariaPath);
+                        comileConfig.ReferencesInMemory.AddRange(testConfig.TerrariaDependencyAssemblies);
+                        if (firstCompile) // Write the Terraria dependencies to disk on the first compile...
+                        {
+                            comileConfig.ClearTemporaryFilesWhenDone = false;
+                            comileConfig.ReuseTemporaryFiles = false;
+                        }
+                        else // ...and reuse them on subsequent compiles. They will be finally deleted with HPluginAssemblyCompiler.ClearTemporaryCompileFiles() at the end of these tests.
+                        {
+                            comileConfig.ClearTemporaryFilesWhenDone = false;
+                            comileConfig.ReuseTemporaryFiles = true;
+                        }
+                        HPluginCompilationResult compileResult = HPluginAssemblyCompiler.Compile(comileConfig);
+                        if (compileResult.CompiledAssemblies.Count == 0)
+                        {
+                            singleResult.CompileFailure = true;
+                            if (compileResult.CompileErrors.Count > 0)
+                            {
+                                singleResult.GenericMessages.Add("Failed to compile source CS files. Error details are as follows.");
+                                foreach (CompilerError error in compileResult.CompileErrors)
+                                    singleResult.GenericMessages.Add(error.ToString());
+                            }
+                            else
+                            {
+                                singleResult.GenericMessages.Add("Generic failure while compiling source CS files. No error details are available.");
+                            }
+                            allResults.AnyCompileFailure = true;
+                        }
+                        else
+                        {
+                            // Turn the Assembly into a byte array
+                            Assembly asmToTest = compileResult.CompiledAssemblies[0];
+                            BinaryFormatter formatter = new BinaryFormatter();
+                            using (MemoryStream memStream = new MemoryStream())
+                            {
+                                formatter.Serialize(memStream, asmToTest);
+                                asmBytesToTest = memStream.ToArray();
+                            }
+                        }
+                    }
+                    // If already a compiled assembly, load its bytes
+                    else if (pluginFile.FileType == PluginFileType.CompiledAssemblyFile)
+                    {
+                        if (File.Exists(pluginFile.PathToFile))
+                        {
+                            try { asmBytesToTest = File.ReadAllBytes(pluginFile.PathToFile); }
+                            catch (Exception e)
+                            {
+                                singleResult.GenericTestFailure = true;
+                                singleResult.GenericMessages.Add("Could not load assembly \"" + pluginFile.PathToFile + "\" from disk. Details: " + e);
+                            }
+                        }
+                    }
+                    
+                    if (asmBytesToTest == null) // Can't test assemblies that failed to load
+                        continue;
+
+                    ///// Check security compliance with Cecil
+                    using (MemoryStream memStream = new MemoryStream(asmBytesToTest))
+                    {
+                        AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(memStream);
+
+                        // Run tests
+                        if (testConfig.RunLevel1Test)
+                        {
+                            SecurityComplianceSingleCecilTestResult level1TestResults = SecurityComplianceCecilTests.TestLevel1(asmDef);
+                            singleResult.TestedLevel1 = true;
+                            singleResult.PassLevel1 = level1TestResults.Passed;
+                            singleResult.MessagesLevel1.AddRange(level1TestResults.Messages);
+                        }
+                        if (testConfig.RunLevel2Test)
+                        {
+                            SecurityComplianceSingleCecilTestResult level2TestResults = SecurityComplianceCecilTests.TestLevel2(asmDef);
+                            singleResult.TestedLevel2 = true;
+                            singleResult.PassLevel2 = level2TestResults.Passed;
+                            singleResult.MessagesLevel2.AddRange(level2TestResults.Messages);
+                        }
+                        if (testConfig.RunLevel3Test)
+                        {
+                            SecurityComplianceSingleCecilTestResult level3TestResults = SecurityComplianceCecilTests.TestLevel3(asmDef);
+                            singleResult.TestedLevel3 = true;
+                            singleResult.PassLevel3 = level3TestResults.Passed;
+                            singleResult.MessagesLevel3.AddRange(level3TestResults.Messages);
+                        }
+                        if (testConfig.RunLevel4Test)
+                        {
+                            SecurityComplianceSingleCecilTestResult level4TestResults = SecurityComplianceCecilTests.TestLevel4(asmDef);
+                            singleResult.TestedLevel4 = true;
+                            singleResult.PassLevel4 = level4TestResults.Passed;
+                            singleResult.MessagesLevel4.AddRange(level4TestResults.Messages);
+                        }
+
+                        // Make an aggregated generic messag for the user
+                        string overallResult = "Final security level test results >> ";
+                        overallResult += "Security Level 1: " + (singleResult.TestedLevel1 ? (singleResult.PassLevel1 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += "; Security Level 2: " + (singleResult.TestedLevel2 ? (singleResult.PassLevel2 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += "; Security Level 3: " + (singleResult.TestedLevel3 ? (singleResult.PassLevel3 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += "; Security Level 4: " + (singleResult.TestedLevel4 ? (singleResult.PassLevel4 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += ".";
+                        singleResult.GenericMessages.Add(overallResult);
+
+                        // All done
+                    }
+                }
+                catch (Exception e)
+                {
+                    singleResult.GenericTestFailure = true;
+                    singleResult.GenericMessages.Add("Unexpected error during security level testing: " + e.ToString());
+                }
+
+                // Add single test result to final collection
+                allResults.IndividualResults[pluginFile] = singleResult;
+
+                firstCompile = false;
+            }
+
+            // Delete the temporary disk copies of the Terraria dependencies
+            HPluginAssemblyCompiler.ClearTemporaryCompileFiles();
+
+            return allResults;
+        }
     }
 }

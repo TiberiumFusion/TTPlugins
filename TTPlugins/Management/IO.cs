@@ -33,7 +33,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// <summary>
         /// List of all PluginFiles that were found in the PluginsUserFilesFolder.
         /// </summary>
-        public static List<PluginFile> FoundUserFiles { get; private set; } = new List<PluginFile>();
+        public static List<PluginFile> FoundUserPluginFiles { get; private set; } = new List<PluginFile>();
 
         #endregion
 
@@ -59,12 +59,12 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         public static void Rescan()
         {
-            FoundUserFiles.Clear();
+            FoundUserPluginFiles.Clear();
 
             // Find CS source plugin files
             string[] filesA = Directory.GetFiles(PluginsUserFilesFolder, "*.cs", SearchOption.AllDirectories);
             foreach (string file in filesA)
-                FoundUserFiles.Add(new PluginFile(file, PluginFileType.CSSourceFile));
+                FoundUserPluginFiles.Add(new PluginFile(file, PluginFileType.CSSourceFile));
 
             // Find compiled assembly plugin files
             string[] filesB = Directory.GetFiles(PluginsUserFilesFolder, "*.dll", SearchOption.AllDirectories);
@@ -80,8 +80,25 @@ namespace com.tiberiumfusion.ttplugins.Management
                 catch (Exception e) { }
 
                 if (valid)
-                    FoundUserFiles.Add(new PluginFile(file, PluginFileType.CompiledAssemblyFile));
+                    FoundUserPluginFiles.Add(new PluginFile(file, PluginFileType.CompiledAssemblyFile));
             }
+        }
+        
+
+        /// <summary>
+        /// Tests all found PluginFiles against all security levels so as to determine the maximum security level that will allow each plugin to function.
+        /// </summary>
+        /// <param name="terrariaPath">Path to Terraria.exe, which will be referenced by CodeDom during compilation.</param>
+        /// <param name="terrariaDependencyAssemblies">List of Terraria.exe's embedded dependency assemblies, which will be temporarily written to disk and reference by CodeDom during compilation.</param>
+        /// <returns>A SecurityLevelComplianceTestResult object containing the test results.</returns>
+        public static SecurityLevelComplianceTestsResults TestAllSecurityLevelComplianceForAllPlugins(string terrariaPath, List<byte[]> terrariaDependencyAssemblies)
+        {
+            SecurityLevelComplianceTestConfiguration config = new SecurityLevelComplianceTestConfiguration();
+            config.PluginFilesToTest = new List<PluginFile>();
+            config.PluginFilesToTest.AddRange(FoundUserPluginFiles);
+            config.TerrariaPath = terrariaPath;
+            config.TerrariaDependencyAssemblies = terrariaDependencyAssemblies;
+            return SecurityComplianceCecilTests.TestPluginCompliance(config);
         }
     }
 }

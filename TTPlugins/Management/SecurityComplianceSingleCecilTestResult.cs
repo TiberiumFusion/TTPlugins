@@ -9,7 +9,7 @@ namespace com.tiberiumfusion.ttplugins.Management
     /// <summary>
     /// Holder of the test results of a security compliance test.
     /// </summary>
-    public class SecurityComplianceSingleTestResult
+    public class SecurityComplianceSingleCecilTestResult
     {
         /// <summary>
         /// Whether or not the assembly passed the test.
@@ -26,7 +26,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="passed">The value to assign to the Passed property.</param>
         /// <param name="messages">The value to assign to the Messages property.</param>
-        public SecurityComplianceSingleTestResult(bool passed, List<string> messages)
+        public SecurityComplianceSingleCecilTestResult(bool passed, List<string> messages)
         {
             Passed = passed;
             Messages = messages;

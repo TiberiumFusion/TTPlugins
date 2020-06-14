@@ -69,8 +69,10 @@
     <Compile Include="Management\PluginFile.cs" />
     <Compile Include="Management\PluginFileType.cs" />
     <Compile Include="Management\SecurityComplianceCecilTests.cs" />
-    <Compile Include="Management\SecurityComplianceSingleTestResult.cs" />
-    <Compile Include="Management\SecurityLevelComplianceTestResult.cs" />
+    <Compile Include="Management\SecurityComplianceSingleCecilTestResult.cs" />
+    <Compile Include="Management\SecurityLevelComplianceSingleTestResult.cs" />
+    <Compile Include="Management\SecurityLevelComplianceTestConfiguration.cs" />
+    <Compile Include="Management\SecurityLevelComplianceTestsResults.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

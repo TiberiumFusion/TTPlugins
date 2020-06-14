@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace com.tiberiumfusion.ttplugins.Management
 {
     /// <summary>
-    /// A simple holder of result data that is returned by PluginFile.TestSecurityLevelCompliance()
+    /// Container of secury compliance test results for a single PluginFile.
     /// </summary>
-    public class SecurityLevelComplianceTestResults
+    public class SecurityLevelComplianceSingleTestResult
     {
         /// <summary>
         /// Whether or not an unexpected exception occurred during the test.
@@ -25,6 +25,26 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// Messages from the testing process that are not specific to the individual security tests.
         /// </summary>
         public List<string> GenericMessages = new List<string>();
+
+        /// <summary>
+        /// Whether or not compliance with Level 1 security was tested.
+        /// </summary>
+        public bool TestedLevel1 = false;
+
+        /// <summary>
+        /// Whether or not compliance with Level 2 security was tested.
+        /// </summary>
+        public bool TestedLevel2 = false;
+
+        /// <summary>
+        /// Whether or not compliance with Level 3 security was tested.
+        /// </summary>
+        public bool TestedLevel3 = false;
+
+        /// <summary>
+        /// Whether or not compliance with Level 4 security was tested.
+        /// </summary>
+        public bool TestedLevel4 = false;
 
         /// <summary>
         /// Whether or not the compiled plugin is compliant with Level 1 security.
@@ -45,7 +65,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// Whether or not the compiled plugin is compliant with Level 4 security.
         /// </summary>
         public bool PassLevel4 = false;
-        
+
         /// <summary>
         /// Messages from the Level 1 testing procedure, which can be shown to the user in UI if applicable.
         /// </summary>
@@ -65,5 +85,20 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// Messages from the Level 4 testing procedure, which can be shown to the user in UI if applicable.
         /// </summary>
         public List<string> MessagesLevel4 = new List<string>();
+
+        /// <summary>
+        /// The PluginFile associated with these test results.
+        /// </summary>
+        public PluginFile TestedPluginFile { get; private set; }
+
+
+        /// <summary>
+        /// Creates a new SecurityLevelComplianceSingleTestResult for the specified PluginFile.
+        /// </summary>
+        /// <param name="pluginFileToTest">The PluginFile to associate with these test results.</param>
+        public SecurityLevelComplianceSingleTestResult(PluginFile pluginFileToTest)
+        {
+            TestedPluginFile = pluginFileToTest;
+        }
     }
 }
