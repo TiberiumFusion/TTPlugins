@@ -43,6 +43,29 @@ namespace com.tiberiumfusion.ttplugins.Management
             FileType = type;
         }
 
+        /// <summary>
+        /// Updates this PluginFile when the contents of the file on the disk change.
+        /// </summary>
+        public void UpdateFromFileChange()
+        {
+            // Nothing here for now
+        }
+
+        /// <summary>
+        /// Update this PluginFile's PathToFile and FileType to correspond to a new path.
+        /// </summary>
+        /// <param name="newPath"></param>
+        public void UpdateFilePath(string newPath)
+        {
+            PathToFile = newPath;
+
+            string newExt = Path.GetExtension(Path.GetFullPath(newPath)).ToLowerInvariant();
+            if (newExt == ".cs")
+                FileType = PluginFileType.CSSourceFile;
+            else if (newExt == ".dll")
+                FileType = PluginFileType.CompiledAssemblyFile;
+        }
+
 
         /// <summary>
         /// Tests this PluginFile against all security levels so as to determine the maximum security level that will allow this plugin to function.
