@@ -25,13 +25,25 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="deeperNamespace">The deeper namespace to test for existence in the shallower namespace(s).</param>
         /// <param name="shallowerNamespaces">The shallower namespace(s) that the deeper namespace may potentially be a part of.</param>
+        /// <param name="ignoreNamespaces">A list of shallower namespace(s) which will be skipped for testing, even if they are part of the shallowerNamespaces list.</param>
         /// <returns>If the deeperNamespace is part of any of the shallowerNamespaces, will return the shallower namespace it was found in. Otherwise, null will be returned.</returns>
-        private static string NamespaceIsPartOfOtherNamespace(string deeperNamespace, List<string> shallowerNamespaces)
+        private static string NamespaceIsPartOfOtherNamespace(string deeperNamespace, List<string> shallowerNamespaces, List<string> ignoreNamespaces = null)
         {
+            if (ignoreNamespaces != null)
+            {
+                foreach (string shallowIgnoreNS in ignoreNamespaces)
+                {
+                    if (deeperNamespace.IndexOf(shallowIgnoreNS) == 0)
+                        return null;
+                }
+            }
+
             foreach (string shallowNS in shallowerNamespaces)
             {
                 if (deeperNamespace.IndexOf(shallowNS) == 0)
+                {
                     return shallowNS;
+                }
             }
             return null;
         }
@@ -56,7 +68,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// <param name="restrictedNamespaces">A list of restricted namespaces to check for usage of.</param>
         /// <param name="pass">Reference to the test's ultimate pass flag.</param>
         /// <param name="messages">Reference to test's output messages list.</param>
-        private static void TestForRestrictedNamespaces(AssemblyDefinition asmDef, List<string> restrictedNamespaces, ref bool pass, List<string> messages)
+        private static void TestForRestrictedNamespaces(AssemblyDefinition asmDef, List<string> restrictedNamespaces, List<string> whitelistedNamespaces, ref bool pass, List<string> messages)
         {
             foreach (ModuleDefinition modDef in asmDef.Modules)
             {
@@ -75,7 +87,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                 if (asFieldReference != null)
                                 {
                                     // Check for reference to any field in a restricted namespace
-                                    string violatedNamespace = NamespaceIsPartOfOtherNamespace(asFieldReference.DeclaringType.Namespace, restrictedNamespaces);
+                                    string violatedNamespace = NamespaceIsPartOfOtherNamespace(asFieldReference.DeclaringType.Namespace, restrictedNamespaces, whitelistedNamespaces);
                                     if (violatedNamespace != null)
                                     {
                                         pass = false;
@@ -87,7 +99,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                 if (asMethodReference != null)
                                 {
                                     // Check for reference to any method in a restricted namespace
-                                    string violatedNamespace = NamespaceIsPartOfOtherNamespace(asMethodReference.DeclaringType.Namespace, restrictedNamespaces);
+                                    string violatedNamespace = NamespaceIsPartOfOtherNamespace(asMethodReference.DeclaringType.Namespace, restrictedNamespaces, whitelistedNamespaces);
                                     if (violatedNamespace != null)
                                     {
                                         pass = false;
@@ -99,7 +111,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                 if (asTypeReference != null)
                                 {
                                     // Check for reference to any type in a restricted namespace
-                                    string violatedNamespace = NamespaceIsPartOfOtherNamespace(asTypeReference.Namespace, restrictedNamespaces);
+                                    string violatedNamespace = NamespaceIsPartOfOtherNamespace(asTypeReference.Namespace, restrictedNamespaces, whitelistedNamespaces);
                                     if (violatedNamespace != null)
                                     {
                                         pass = false;
@@ -197,11 +209,15 @@ namespace com.tiberiumfusion.ttplugins.Management
                 "com.tiberiumfusion",
                 "HarmonyLib",
             };
+            List<string> whitelistedNamespaces = new List<string>()
+            {
+                "com.tiberiumfusion.ttplugins.HarmonyPlugins",
+            };
 
             bool pass = true;
             List<string> messages = new List<string>();
 
-            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
+            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, whitelistedNamespaces, ref pass, messages);
             
             return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
@@ -231,7 +247,7 @@ namespace com.tiberiumfusion.ttplugins.Management
             bool pass = true;
             List<string> messages = new List<string>();
 
-            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
+            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, null, ref pass, messages);
             TestForRestrictedTypes(asmDef, restrictedTypes, ref pass, messages);
 
             return new SecurityComplianceSingleCecilTestResult(pass, messages);
@@ -254,7 +270,7 @@ namespace com.tiberiumfusion.ttplugins.Management
             bool pass = true;
             List<string> messages = new List<string>();
 
-            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
+            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, null, ref pass, messages);
 
             return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
@@ -274,7 +290,7 @@ namespace com.tiberiumfusion.ttplugins.Management
             bool pass = true;
             List<string> messages = new List<string>();
 
-            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, ref pass, messages);
+            TestForRestrictedNamespaces(asmDef, restrictedNamespaces, null, ref pass, messages);
 
             return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
