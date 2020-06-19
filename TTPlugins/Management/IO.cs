@@ -176,6 +176,8 @@ namespace com.tiberiumfusion.ttplugins.Management
         {
             if (Path.GetExtension(e.FullPath).ToLowerInvariant() == ".cs" || Path.GetExtension(e.FullPath).ToLowerInvariant() == ".dll")
                 TryRemoveUserFile(e.FullPath);
+            else if (!Path.HasExtension(e.FullPath))
+                TryRemoveUserFilesInDirectory(e.FullPath);
         }
         private static void FSWatcherUserFiles_Changed(object sender, FileSystemEventArgs e)
         {
@@ -186,6 +188,8 @@ namespace com.tiberiumfusion.ttplugins.Management
         {
             if (Path.GetExtension(e.OldFullPath).ToLowerInvariant() == ".cs" || Path.GetExtension(e.OldFullPath).ToLowerInvariant() == ".dll")
                 TryRenameUserFile(e.OldFullPath, e.FullPath);
+            else if (!Path.HasExtension(e.OldFullPath) && !Path.HasExtension(e.FullPath))
+                TryRenameUserFilesInDirectory(e.OldFullPath, e.FullPath);
         }
         private static void FSWatcherUserFiles_Error(object sender, ErrorEventArgs e)
         {
@@ -293,6 +297,32 @@ namespace com.tiberiumfusion.ttplugins.Management
         }
 
         /// <summary>
+        /// Removes all files in the provided directory from the FoundUserPluginFiles list if they are valid. Necessary because FileSystemWatcher does not fire for the individual files that are deleted when their parent folder is deleted.
+        /// </summary>
+        /// <param name="path">The full path to the file.</param>
+        /// <returns>True if any plugin files were removed, false if otherwise.</returns>
+        private static bool TryRemoveUserFilesInDirectory(string path)
+        {
+            List<PluginFile> toRemove = new List<PluginFile>();
+            foreach (PluginFile pluginFile in FoundUserPluginFiles)
+            {
+                if (IsPathInPath(pluginFile.PathToFile, path))
+                {
+                    toRemove.Add(pluginFile);
+                }
+            }
+
+            bool removedAny = false;
+            foreach (PluginFile pluginFile in toRemove)
+            {
+                FoundUserPluginFiles.Remove(pluginFile);
+                removedAny = true;
+                OnUserPluginFileRemoved(new UserPluginFileEventArgs(pluginFile.PathToFile, pluginFile));
+            }
+            return removedAny;
+        }
+
+        /// <summary>
         /// Updates the PluginFile specified by the provided path if it exists in the FoundUserPluginFiles list.
         /// </summary>
         /// <param name="path">The full path to the file.</param>
@@ -386,6 +416,38 @@ namespace com.tiberiumfusion.ttplugins.Management
             return false;
         }
 
+        /// <summary>
+        /// Similar to TryRemoveUserFilesInDirectory, this renames all PluginFiles in the provided directory which was just renamed itself (thus changing the full path of its contents).
+        /// </summary>
+        /// <param name="oldPath">The old path to directory.</param>
+        /// <param name="newPath">The new path to directory.</param>
+        /// <returns>True if any plugin files were renamed, false if otherwise.</returns>
+        private static bool TryRenameUserFilesInDirectory(string oldPath, string newPath)
+        {
+            List<PluginFile> toRename = new List<PluginFile>();
+            foreach (PluginFile pluginFile in FoundUserPluginFiles)
+            {
+                if (IsPathInPath(pluginFile.PathToFile, oldPath))
+                {
+                    toRename.Add(pluginFile);
+                }
+            }
+
+            bool renamedAny = false;
+            foreach (PluginFile pluginFile in toRename)
+            {
+                // Derive the new path simply by replacing part of the path string
+                string simulatedNewPath = pluginFile.PathToFile;
+                int spot = simulatedNewPath.IndexOf(oldPath);
+                if (spot >= 0)
+                    simulatedNewPath = simulatedNewPath.Substring(0, spot) + newPath + simulatedNewPath.Substring(spot + oldPath.Length);
+
+                TryRenameUserFile(pluginFile.PathToFile, simulatedNewPath);
+                renamedAny = true;
+            }
+            return renamedAny;
+        }
+
         #endregion
 
 
@@ -417,6 +479,19 @@ namespace com.tiberiumfusion.ttplugins.Management
         private static bool PathsAreEqual(string pathA, string pathB)
         {
             return (Path.GetFullPath(pathA).ToLowerInvariant() == Path.GetFullPath(pathB).ToLowerInvariant()); // This isn't 100% correct on Linux, but I'm only targeting Windows
+        }
+
+        /// <summary>
+        /// Checks if a deeper path is part of a shallower path, using standardized, absolute paths for comparison.
+        /// </summary>
+        /// <param name="deeperPath">The deeper path, i.e. C:\Users\MyUsername\SomeFile.txt</param>
+        /// <param name="shallowerPath">The shallower path, i.e. C:\Users\</param>
+        /// <returns>True if the the deeper path path is contained by the shallower path, false if otherwise</returns>
+        private static bool IsPathInPath(string deeperPath, string shallowerPath)
+        {
+            string deeperPathStandardized = Path.GetFullPath(deeperPath).ToLowerInvariant();
+            string shallowerPathStandardized = Path.GetFullPath(shallowerPath).ToLowerInvariant();
+            return (deeperPath.IndexOf(shallowerPath) == 0);
         }
 
         #endregion
