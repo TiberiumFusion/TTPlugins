@@ -158,9 +158,9 @@ namespace com.tiberiumfusion.ttplugins.Management
                 FSWatcherUserFiles.Deleted += FSWatcherUserFiles_Deleted;
                 FSWatcherUserFiles.Renamed += FSWatcherUserFiles_Renamed;
                 FSWatcherUserFiles.Error += FSWatcherUserFiles_Error;
+                FSWatcherUserFiles.IncludeSubdirectories = true;
                 FSWatcherUserFiles.EnableRaisingEvents = true;
             }
-
         }
         
         ///// FileSystemWatcher events for the plugin user files folder
