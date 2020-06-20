@@ -24,7 +24,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <summary>
         /// A list of all HPlugins that were successfully applied.
         /// </summary>
-        internal static List<HSupervisedPlugin> AppliedHPlugins { get; private set; }
+        internal static List<HSupervisedPlugin> AppliedHPlugins { get; private set; } = new List<HSupervisedPlugin>();
 
         /// <summary>
         /// Dictionary that maps each HPlugin to the HSupervisedPlugin object that manages it.
@@ -116,7 +116,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
 
             // Find all HPlugins in the compiled assemblies
-            AppliedHPlugins = new List<HSupervisedPlugin>();
+            AppliedHPlugins.Clear();
             try
             {
                 foreach (byte[] usercodeAsmBytes in configuration.AllUsercodeAssemblies)
@@ -148,38 +148,50 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
+                            result.HPluginsThatFailedInitialize[supervisedPlugin.Plugin.GetType().FullName] = e;
                             result.HPluginsThatThrewExceptions[supervisedPlugin.SavedataIdentity] = e;
                             continue; // Skip over this plugin
                         }
-                        
-                        // If the plugin has persistent data, load that now
+
+                        // If the plugin has persistent data and has a non-default identity name, load that now
                         XDocument pluginConfigurationDoc = null;
-                        if (supervisedPlugin.Plugin.HasPersistentData)
+                        bool successfulConfigLoad = false;
+                        if (supervisedPlugin.Plugin.Identity.HasModifiedName)
                         {
-                            // Try to load the plugin configuration from the disk
-                            try
+                            if (supervisedPlugin.Plugin.HasPersistentData)
                             {
-                                string savedataFile = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, configuration);
-                                if (File.Exists(savedataFile)) // Load config if it exists
+                                // Try to load the plugin configuration from the disk
+                                try
                                 {
-                                    pluginConfigurationDoc = XDocument.Load(savedataFile);
+                                    string configurationXMLFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, configuration);
+                                    if (File.Exists(configurationXMLFilePath)) // Load config if it exists
+                                        pluginConfigurationDoc = XDocument.Load(configurationXMLFilePath);
+
+                                    successfulConfigLoad = true; // This is true for two cases: existing config file loaded successfully AND didn't have config already, so a fresh one was made
+                                }
+                                catch (Exception e)
+                                {
+                                    result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SavedataIdentity] = e;
                                 }
                             }
-                            catch (Exception e)
-                            {
-                                result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SavedataIdentity] = e;
-                            }
+                            // If config didnt exist or failed to load, create a new default one
+                            if (pluginConfigurationDoc == null)
+                                pluginConfigurationDoc = CreateBlankPluginSavedataDoc();
                         }
-                        // If config didnt exist or failed to load, create a new default one
-                        if (pluginConfigurationDoc == null)
-                            pluginConfigurationDoc = CreateBlankPluginSavedataDoc();
+                        else
+                        {
+                            result.HPluginsWithDefaultIDNames.Add(supervisedPlugin.SavedataIdentity);
+                        }
 
                         // Setup the Configuration object from the xml doc
+                        HPluginConfiguration pluginConfiguration = new HPluginConfiguration(); // Create a new configuration with empty default values
                         try
                         {
                             XElement savedataElement = pluginConfigurationDoc.Element("Savedata");
                             if (savedataElement != null)
-                                supervisedPlugin.Plugin.Configuration.Savedata = savedataElement;
+                            {
+                                pluginConfiguration.Savedata = savedataElement;
+                            }
                         }
                         catch (Exception e)
                         {
@@ -187,10 +199,13 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             // In this case, the HPlugin will have a default HPluginConfiguration object with an empty savedata XElement
                         }
 
-                        // Configure() lets the plugin know it can safely read Configuration now
+                        // Give the configuration to the HPlugin
+                        supervisedPlugin.Plugin.ReceiveConfiguration(pluginConfiguration);
+
+                        // ConfigurationLoaded() lets the plugin know it can safely read Configuration now
                         try
                         {
-                            supervisedPlugin.Plugin.Configure();
+                            supervisedPlugin.Plugin.ConfigurationLoaded(successfulConfigLoad);
                         }
                         catch (Exception e)
                         {
@@ -199,7 +214,18 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
 
                         // Now that the plugin is initialized and configured, it is finally time to patch it in with Harmony
-                        // Do all the patch operations defined by the plugin (should have been done by the user in Initialize() or Configure())
+                        // But first, we give the plugin one last chance to define its patch operations
+                        try
+                        {
+                            supervisedPlugin.Plugin.PrePatch();
+                        }
+                        catch (Exception e)
+                        {
+                            result.HPluginsThatThrewExceptions[supervisedPlugin.SavedataIdentity] = e;
+                            continue; // Skip over this plugin
+                        }
+
+                        // Do all the patch operations defined by the plugin
                         foreach (HPatchOperation patchOp in supervisedPlugin.Plugin.PatchOperations)
                         {
                             // First validate the patchOp
@@ -281,15 +307,15 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
             string savedataFolder = Path.Combine(applicatorConfiguration.RootPluginSavedataPath, supervisedPlugin.SavedataIdentity);
             Directory.CreateDirectory(savedataFolder); // Ensure directory exists
-            string savedataFile = Path.Combine(savedataFolder, "configuration.xml");
-            return savedataFile;
+            string configurationXMLFilePath = Path.Combine(savedataFolder, "configuration.xml");
+            return configurationXMLFilePath;
         }
 
         /// <summary>
         /// Asynchronously writes the specified HPlugin's Configuration property to disk. Is typically called by HPlugins when their usercode logic wants to save their Configuration's current Savedata.
         /// </summary>
         /// <param name="plugin"></param>
-        internal static void WriteConfigurationForHPatch(HPlugin plugin)
+        internal static void WriteConfigurationForHPlugin(HPlugin plugin)
         {
             Task.Run(() =>
             {

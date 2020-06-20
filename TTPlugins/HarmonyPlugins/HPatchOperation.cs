@@ -32,7 +32,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Creates a new patch operation using the supplied target method, stub method, and patch location.
         /// </summary>
         /// <param name="targetMethod">The target method that will be patched.</param>
-        /// <param name="stubMethod">The stub method that will be either prepended or appended to the target method.</param>
+        /// <param name="stubMethod">The stub method that will be either prepended or appended to the target method. Must be a static method!</param>
         /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
         public HPatchOperation(MethodInfo targetMethod, MethodInfo stubMethod, HPatchLocation patchLocation)
         {
@@ -46,7 +46,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// </summary>
         /// <param name="targetType">The target type that contains the target method.</param>
         /// <param name="targetMethodName">The name of the target method.</param>
-        /// <param name="stubMethod">The stub method that will be either prepended or appended to the target method.</param>
+        /// <param name="stubMethod">The stub method that will be either prepended or appended to the target method. Must be a static method!</param>
         /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
         public HPatchOperation(Type targetType, string targetMethodName, MethodInfo stubMethod, HPatchLocation patchLocation)
         {

@@ -29,27 +29,37 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public string ErrorMessage = null;
 
         /// <summary>
-        /// List of HPlugins (by their unique SavedataIdentity name) that could not have their on-disk configuration loaded and the corresponding exception
+        /// List of HPlugins (by their unique SavedataIdentity name) that could not have their on-disk configuration loaded and the corresponding exception.
         /// </summary>
         public Dictionary<string, Exception> HPluginsWithFailedConfigurationLoads = new Dictionary<string, Exception>();
 
         /// <summary>
-        /// List of HPlugins (by their unique SavedataIdentity name) that threw exceptions while executing their override methods
+        /// List of HPlugins (by their unique SavedataIdentity name) that have a default identity name (and thus cannot have config loaded).
+        /// </summary>
+        public List<string> HPluginsWithDefaultIDNames = new List<string>();
+
+        /// <summary>
+        /// List of HPlugins (by fully qualified type name) that threw exceptions during their Initialize() (and thus don't have a valid Identity to use).
+        /// </summary>
+        public Dictionary<string, Exception> HPluginsThatFailedInitialize = new Dictionary<string, Exception>();
+
+        /// <summary>
+        /// List of HPlugins (by their unique SavedataIdentity name) that threw exceptions while executing their override methods.
         /// </summary>
         public Dictionary<string, Exception> HPluginsThatThrewExceptions = new Dictionary<string, Exception>();
 
         /// <summary>
-        /// List of HPlugins (by their unique SavedataIdentity name) that tried to do things they shouldn't do
+        /// List of HPlugins (by their unique SavedataIdentity name) that tried to do things they shouldn't do.
         /// </summary>
         public Dictionary<string, string> HPluginsThatBrokeRules = new Dictionary<string, string>();
 
         /// <summary>
-        /// List of HPlugins (by their unique SavedataIdentity name) that tried to patch null MethodInfos
+        /// List of HPlugins (by their unique SavedataIdentity name) that tried to patch null MethodInfos.
         /// </summary>
         public List<string> HPluginsWithNullMethodInfos = new List<string>();
 
         /// <summary>
-        /// List of HPlugins (by their unique SavedataIdentity name) that threw exceptions while Harmony.Patch was trying to patch them
+        /// List of HPlugins (by their unique SavedataIdentity name) that threw exceptions while Harmony.Patch was trying to patch them.
         /// </summary>
         public Dictionary<string, Exception> HPluginsThatDidntPatch = new Dictionary<string, Exception>();
 
