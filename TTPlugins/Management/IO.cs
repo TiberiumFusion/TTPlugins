@@ -176,7 +176,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         {
             if (Path.GetExtension(e.FullPath).ToLowerInvariant() == ".cs" || Path.GetExtension(e.FullPath).ToLowerInvariant() == ".dll")
                 TryRemoveUserFile(e.FullPath);
-            else if (!Path.HasExtension(e.FullPath))
+            else if (!Directory.Exists(e.FullPath)) // FileSystemWatcher is pretty crap and doesn't tell the difference between a file or folder event. So any time a 'thing' that isnt a .cs or .dll is deleted, we have to treat it like a directory in case there are files inside its path.
                 TryRemoveUserFilesInDirectory(e.FullPath);
         }
         private static void FSWatcherUserFiles_Changed(object sender, FileSystemEventArgs e)
@@ -188,7 +188,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         {
             if (Path.GetExtension(e.OldFullPath).ToLowerInvariant() == ".cs" || Path.GetExtension(e.OldFullPath).ToLowerInvariant() == ".dll")
                 TryRenameUserFile(e.OldFullPath, e.FullPath);
-            else if (!Path.HasExtension(e.OldFullPath) && !Path.HasExtension(e.FullPath))
+            else if (!Directory.Exists(e.OldFullPath) && Directory.Exists(e.FullPath)) // See comment in FSWatcherUserFiles_Deleted
                 TryRenameUserFilesInDirectory(e.OldFullPath, e.FullPath);
         }
         private static void FSWatcherUserFiles_Error(object sender, ErrorEventArgs e)
