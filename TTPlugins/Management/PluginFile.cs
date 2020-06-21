@@ -29,6 +29,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         public PluginFileType FileType { get; private set; }
 
+
         #endregion
 
 
@@ -54,7 +55,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// <summary>
         /// Update this PluginFile's PathToFile and FileType to correspond to a new path.
         /// </summary>
-        /// <param name="newPath"></param>
+        /// <param name="newPath">The new path to use.</param>
         public void UpdateFilePath(string newPath)
         {
             PathToFile = newPath;
@@ -64,6 +65,23 @@ namespace com.tiberiumfusion.ttplugins.Management
                 FileType = PluginFileType.CSSourceFile;
             else if (newExt == ".dll")
                 FileType = PluginFileType.CompiledAssemblyFile;
+        }
+
+        /// <summary>
+        /// Returns the relative path of this plugin file on the disk (relative to IO.PluginsUserFilesFolder).
+        /// </summary>
+        /// <param name="overridePathToFile">An optional full path override to perform this operation for a different path.</param>
+        /// <returns>The relative path, or null if the file is not actually relative to IO.PluginsUserFilesFolder.</returns>
+        public string GetRelativePath(string overridePathToFile = null)
+        {
+            string useFullPath = overridePathToFile ?? PathToFile;
+            string standardizedFullPath = Path.GetFullPath(useFullPath);
+            string standardizedRootDir = Path.GetFullPath(IO.PluginsUserFilesFolder);
+            int spot = standardizedFullPath.IndexOf(standardizedRootDir);
+            if (spot >= 0)
+                return (standardizedFullPath.Substring(0, spot) + standardizedFullPath.Substring(spot + standardizedRootDir.Length)).TrimStart('\\', '/');
+            else
+                return null; // Shouldn't happen
         }
 
 
