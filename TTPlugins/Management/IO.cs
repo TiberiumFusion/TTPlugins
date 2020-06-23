@@ -469,12 +469,29 @@ namespace com.tiberiumfusion.ttplugins.Management
 
 
         /// <summary>
-        /// Returns the path to use for reading and writing temporary, on-disk files relating to the specific PluginFile.
+        /// Returns the temporary folder path to use for reading and writing temporary, on-disk files relating to the specific PluginFile.
         /// </summary>
+        /// <param name="pluginFile">The PluginFile whose PathToFile will be used.</param>
         /// <returns>The path to the directory to use. The directory will NOT be created if it does not exist.</returns>
         public static string GetTemporaryFilePathFor(PluginFile pluginFile)
         {
             return Path.Combine(PluginsTempFilesFolder, pluginFile.GetRelativePath());
+        }
+
+        /// <summary>
+        /// Returns the relative path of provided file on the disk (relative to IO.PluginsUserFilesFolder).
+        /// </summary>
+        /// <param name="fullPath">The full path to be transformed into a relative path.</param>
+        /// <returns>The relative path.</returns>
+        public static string GetRelativeUserFilesPathFor(string fullPath)
+        {
+            string standardizedFullPath = Path.GetFullPath(fullPath);
+            string standardizedRootDir = Path.GetFullPath(PluginsUserFilesFolder);
+            int spot = standardizedFullPath.IndexOf(standardizedRootDir);
+            if (spot >= 0)
+                return (standardizedFullPath.Substring(0, spot) + standardizedFullPath.Substring(spot + standardizedRootDir.Length)).TrimStart('\\', '/');
+            else
+                return null; // Shouldn't happen
         }
 
 

@@ -29,8 +29,13 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public List<byte[]> AllUsercodeAssemblies { get; set; } = new List<byte[]>();
 
         /// <summary>
-        /// Directory where temporary plugin savedata is stored.
+        /// Dictionary that maps the full name of each HPlugin type to the relative path of its source file (which is its configuration and savedata identity).
         /// </summary>
-        public string RootPluginSavedataPath { get; set; }
+        public Dictionary<string, string> PluginTypesRelativePaths { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Path to the root folder to use for temporary plugin files (i.e. temporary configuration & savedata copies).
+        /// </summary>
+        public string PluginTemporaryFilesRootDirectory { get; set; }
     }
 }

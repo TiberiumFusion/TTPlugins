@@ -17,6 +17,11 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public List<string> SourceFiles { get; set; } = new List<string>();
 
         /// <summary>
+        /// Path to the root IO.PluginsUserFilesFolder directory that contains that SourceFiles.
+        /// </summary>
+        public string UserFilesRootDirectory { get; set; }
+
+        /// <summary>
         /// If true, all source files will be compiled into a single output assembly.
         /// If false, each source file will be compiled into its own assembly.
         /// </summary>

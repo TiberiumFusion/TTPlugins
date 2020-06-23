@@ -17,19 +17,31 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         internal HPlugin Plugin { get; set; }
 
         /// <summary>
-        /// Unique name of the supervised HPlugin that is used in determining things like savedata paths.
+        /// Relative path of the source file used to compile the plugin, which is used as a unique identity for plugin configuration and savedata.
         /// </summary>
-        internal string SavedataIdentity { get; set; }
+        internal string SourceFileRelativePath { get; set; }
 
         /// <summary>
         /// Creates a new HSupervisedPlugin wrapped around the provided HPlugin.
         /// </summary>
         /// <param name="plugin">The HPlugin to wrap.</param>
-        internal HSupervisedPlugin(HPlugin plugin)
+        /// <param name="sourceFileRelativePath">The relative path of the plugin's source file.</param>
+        internal HSupervisedPlugin(HPlugin plugin, string sourceFileRelativePath)
         {
             Plugin = plugin;
+            SourceFileRelativePath = sourceFileRelativePath;
+        }
 
-            SavedataIdentity = plugin.GetType().FullName;
+        /// <summary>
+        /// Returns the path to the source file that was used to compile the supervised HPlugin.
+        /// </summary>
+        /// <returns>The path to the source file that was used to compile the supervised HPlugin.</returns>
+        internal string GetPluginSourceFilePath()
+        {
+            string sourcePath = "";
+            try { sourcePath = Plugin.GetSourceFilePath(); }
+            catch (Exception e) { sourcePath = "Unknown plugin source file path."; };
+            return sourcePath;
         }
     }
 }

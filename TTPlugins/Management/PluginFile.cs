@@ -69,18 +69,10 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// <summary>
         /// Returns the relative path of this plugin file on the disk (relative to IO.PluginsUserFilesFolder).
         /// </summary>
-        /// <param name="overridePathToFile">An optional full path override to perform this operation for a different path.</param>
         /// <returns>The relative path, or null if the file is not actually relative to IO.PluginsUserFilesFolder.</returns>
-        public string GetRelativePath(string overridePathToFile = null)
+        public string GetRelativePath()
         {
-            string useFullPath = overridePathToFile ?? PathToFile;
-            string standardizedFullPath = Path.GetFullPath(useFullPath);
-            string standardizedRootDir = Path.GetFullPath(IO.PluginsUserFilesFolder);
-            int spot = standardizedFullPath.IndexOf(standardizedRootDir);
-            if (spot >= 0)
-                return (standardizedFullPath.Substring(0, spot) + standardizedFullPath.Substring(spot + standardizedRootDir.Length)).TrimStart('\\', '/');
-            else
-                return null; // Shouldn't happen
+            return IO.GetRelativeUserFilesPathFor(PathToFile);
         }
 
         /// <summary>

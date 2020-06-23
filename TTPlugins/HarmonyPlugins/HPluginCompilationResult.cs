@@ -27,5 +27,10 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// If true, a generic exception was thrown during compilation.
         /// </summary>
         public bool GenericCompilationFailure { get; set; } = false;
+
+        /// <summary>
+        /// Dictionary that maps the full name of each compiled HPlugin to the relative path of the source file used to compile it.
+        /// </summary>
+        public Dictionary<string, string> CompiledTypesSourceFileRelativePaths { get; set; } = new Dictionary<string, string>();
     }
 }

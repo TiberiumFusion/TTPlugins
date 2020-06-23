@@ -67,14 +67,14 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 if (configuration.SingleAssemblyOutput)
                 {
                     compilerParams.OutputAssembly = "AllCompiledTTPlugins";
-                    CompileOnce(configuration.SourceFiles, compilerParams, csProvider, result);
+                    CompileOnce(configuration.SourceFiles, configuration, compilerParams, csProvider, result);
                 }
                 else
                 {
                     foreach (string sourceFile in configuration.SourceFiles)
                     {
                         compilerParams.OutputAssembly = Path.GetFileNameWithoutExtension(sourceFile);
-                        CompileOnce(new List<string>() { sourceFile }, compilerParams, csProvider, result);
+                        CompileOnce(new List<string>() { sourceFile }, configuration, compilerParams, csProvider, result);
                     }
                 }
             }
@@ -90,7 +90,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             return result;
         }
         
-        private static void CompileOnce(List<string> sourceFiles, CompilerParameters compilerParams, CSharpCodeProvider csProvider, HPluginCompilationResult result)
+        private static void CompileOnce(List<string> sourceFiles, HPluginCompilationConfiguration configuration, CompilerParameters compilerParams, CSharpCodeProvider csProvider, HPluginCompilationResult result)
         {
             CompilerResults compileResult = csProvider.CompileAssemblyFromFile(compilerParams, sourceFiles.ToArray());
 
@@ -100,7 +100,29 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     result.CompileErrors.Add(error);
             }
             else
-                result.CompiledAssemblies.Add(compileResult.CompiledAssembly);
+            {
+                // Get the compiled assembly
+                Assembly asm = compileResult.CompiledAssembly;
+                result.CompiledAssemblies.Add(asm);
+
+                // Then go through all compiled HPlugin types and deduce the relative path of each one so that it can be associated with its savedata
+                foreach (Type type in asm.GetTypes().Where(t => t.IsClass && t.IsSubclassOf(typeof(HPlugin))).ToList())
+                {
+                    string relPath = "";
+                    try
+                    {
+                        HPlugin dummyInstance = Activator.CreateInstance(type) as HPlugin;
+                        string sourcePath = dummyInstance.GetSourceFilePath();
+                        string standardizedSourcePath = Path.GetFullPath(sourcePath);
+                        string standardizedRootDir = Path.GetFullPath(configuration.UserFilesRootDirectory);
+                        int spot = standardizedSourcePath.IndexOf(standardizedRootDir);
+                        if (spot >= 0)
+                            relPath = (standardizedSourcePath.Substring(0, spot) + standardizedSourcePath.Substring(spot + standardizedRootDir.Length)).TrimStart('\\', '/');
+                    }
+                    catch (Exception e) { } // Just swallow it. The plugin probably broke some protocol and thus will not have savedata.
+                    result.CompiledTypesSourceFileRelativePaths[type.FullName] = relPath;
+                }
+            }
         }
         
         /// <summary>

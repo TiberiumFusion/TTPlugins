@@ -136,10 +136,14 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     {
                         // Create an instance of the plugin
                         HPlugin pluginInstance = Activator.CreateInstance(pluginType) as HPlugin;
+
+                        // Find out if it had a relative path at compile time that we can use
+                        string sourceFileRelPath = null;
+                        configuration.PluginTypesRelativePaths.TryGetValue(pluginType.FullName, out sourceFileRelPath);
+                        
                         // Wrap it up
-                        HSupervisedPlugin supervisedPlugin = new HSupervisedPlugin(pluginInstance);
-                        // And map it
-                        HPluginToSupervised[pluginInstance] = supervisedPlugin;
+                        HSupervisedPlugin supervisedPlugin = new HSupervisedPlugin(pluginInstance, sourceFileRelPath);
+                        HPluginToSupervised[pluginInstance] = supervisedPlugin; // And map it
 
                         // Initialize() tells the plugin to set its informational fields, which need to be established first and foremost
                         try
@@ -148,17 +152,18 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsThatFailedInitialize[supervisedPlugin.Plugin.GetType().FullName] = e;
-                            result.HPluginsThatThrewExceptions[supervisedPlugin.SavedataIdentity] = e;
+                            result.HPluginsThatFailedInitialize[supervisedPlugin.GetPluginSourceFilePath()] = e;
                             continue; // Skip over this plugin
                         }
 
-                        // If the plugin has persistent data and has a non-default identity name, load that now
-                        XDocument pluginConfigurationDoc = null;
+                        // Start plugin with a default configuration doc
+                        XDocument pluginConfigurationDoc = CreateBlankPluginSavedataDoc();
+
+                        // If the plugin has persistent data and a valid relpath, load that now
                         bool successfulConfigLoad = false;
-                        if (supervisedPlugin.Plugin.Identity.HasModifiedName)
+                        if (supervisedPlugin.Plugin.HasPersistentData)
                         {
-                            if (supervisedPlugin.Plugin.HasPersistentData)
+                            if (supervisedPlugin.SourceFileRelativePath != null)
                             {
                                 // Try to load the plugin configuration from the disk
                                 try
@@ -167,20 +172,13 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                     if (File.Exists(configurationXMLFilePath)) // Load config if it exists
                                         pluginConfigurationDoc = XDocument.Load(configurationXMLFilePath);
 
-                                    successfulConfigLoad = true; // This is true for two cases: existing config file loaded successfully AND didn't have config already, so a fresh one was made
+                                    successfulConfigLoad = true;
                                 }
                                 catch (Exception e)
                                 {
-                                    result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SavedataIdentity] = e;
+                                    result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.GetPluginSourceFilePath()] = e;
                                 }
                             }
-                            // If config didnt exist or failed to load, create a new default one
-                            if (pluginConfigurationDoc == null)
-                                pluginConfigurationDoc = CreateBlankPluginSavedataDoc();
-                        }
-                        else
-                        {
-                            result.HPluginsWithDefaultIDNames.Add(supervisedPlugin.SavedataIdentity);
                         }
 
                         // Setup the Configuration object from the xml doc
@@ -195,7 +193,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SavedataIdentity] = e;
+                            result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.GetPluginSourceFilePath()] = e;
                             // In this case, the HPlugin will have a default HPluginConfiguration object with an empty savedata XElement
                         }
 
@@ -209,7 +207,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsThatThrewExceptions[supervisedPlugin.SavedataIdentity] = e;
+                            result.HPluginsThatThrewExceptions[supervisedPlugin.GetPluginSourceFilePath()] = e;
                             continue; // Skip over this plugin
                         }
 
@@ -221,7 +219,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsThatThrewExceptions[supervisedPlugin.SavedataIdentity] = e;
+                            result.HPluginsThatThrewExceptions[supervisedPlugin.GetPluginSourceFilePath()] = e;
                             continue; // Skip over this plugin
                         }
 
@@ -233,7 +231,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             // Ensure both the target and patch stub MethodInfos exist
                             if (patchOp.TargetMethod == null || patchOp.StubMethod == null)
                             {
-                                result.HPluginsWithNullMethodInfos.Add(supervisedPlugin.SavedataIdentity);
+                                result.HPluginsWithNullMethodInfos.Add(supervisedPlugin.GetPluginSourceFilePath());
                                 continue; // Skip over this plugin
                             }
 
@@ -243,7 +241,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             {
                                 if (patchOp.TargetMethod.DeclaringType.Namespace.IndexOf(protectedNamespace) == 0)
                                 {
-                                    result.HPluginsThatBrokeRules[supervisedPlugin.SavedataIdentity] = "Tried to patch protected namespace: \"" + protectedNamespace + "\"";
+                                    result.HPluginsThatBrokeRules[supervisedPlugin.GetPluginSourceFilePath()] = "Tried to patch protected namespace: \"" + protectedNamespace + "\"";
                                     brokeRules = true;
                                     break;
                                 }
@@ -263,7 +261,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             }
                             catch (Exception e)
                             {
-                                result.HPluginsThatDidntPatch[supervisedPlugin.SavedataIdentity] = e;
+                                result.HPluginsThatDidntPatch[supervisedPlugin.GetPluginSourceFilePath()] = e;
                                 // Carry on to the next plugin
                             }
                         }
@@ -304,10 +302,10 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         {
             if (applicatorConfiguration == null)
                 return null;
-
-            string savedataFolder = Path.Combine(applicatorConfiguration.RootPluginSavedataPath, supervisedPlugin.SavedataIdentity);
-            Directory.CreateDirectory(savedataFolder); // Ensure directory exists
-            string configurationXMLFilePath = Path.Combine(savedataFolder, "configuration.xml");
+            
+            string tempFolder = Path.Combine(applicatorConfiguration.PluginTemporaryFilesRootDirectory, supervisedPlugin.SourceFileRelativePath);
+            Directory.CreateDirectory(tempFolder); // Ensure directory exists
+            string configurationXMLFilePath = Path.Combine(tempFolder, "RuntimeConfiguration.xml");
             return configurationXMLFilePath;
         }
 
