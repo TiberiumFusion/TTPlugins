@@ -29,7 +29,6 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         public PluginFileType FileType { get; private set; }
 
-
         #endregion
 
 
@@ -82,6 +81,15 @@ namespace com.tiberiumfusion.ttplugins.Management
                 return (standardizedFullPath.Substring(0, spot) + standardizedFullPath.Substring(spot + standardizedRootDir.Length)).TrimStart('\\', '/');
             else
                 return null; // Shouldn't happen
+        }
+
+        /// <summary>
+        /// Returns the path to use for reading and writing temporary, on-disk files relating to this PluginFile.
+        /// </summary>
+        /// <returns>The path to the directory to use. The directory will NOT be created if it does not exist.</returns>
+        public string GetTemporaryFilesPath()
+        {
+            return IO.GetTemporaryFilePathFor(this);
         }
 
 

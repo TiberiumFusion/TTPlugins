@@ -26,9 +26,9 @@ namespace com.tiberiumfusion.ttplugins.Management
         public static string PluginsDataFolder { get; private set; } // Should be %APPDATA%/Terraria Tweaker 2/ttplugins
 
         /// <summary>
-        /// Absolute path to the folder where plugin savedata is temporarily written to during a tweak launch, before being written into the Tweak List by TTApplicator on patch lifecycle end.
+        /// Absolute path to the root folder where plugin data is temporarily written, such as for a tweak launch or to edit configuration.
         /// </summary>
-        public static string PluginsTempSavedataFolder { get { return Path.Combine(PluginsDataFolder, "TempSavedata"); } }
+        public static string PluginsTempFilesFolder { get { return Path.Combine(PluginsDataFolder, "TempPluginFiles"); } }
 
         /// <summary>
         /// List of all PluginFiles that were found in the PluginsUserFilesFolder.
@@ -132,7 +132,7 @@ namespace com.tiberiumfusion.ttplugins.Management
             // Create folders
             Directory.CreateDirectory(PluginsUserFilesFolder);
             Directory.CreateDirectory(PluginsDataFolder);
-            Directory.CreateDirectory(PluginsTempSavedataFolder);
+            Directory.CreateDirectory(PluginsTempFilesFolder);
 
             // Initial user file scan
             RescanAll();
@@ -465,6 +465,16 @@ namespace com.tiberiumfusion.ttplugins.Management
             config.TerrariaPath = terrariaPath;
             config.TerrariaDependencyAssemblies = terrariaDependencyAssemblies;
             return SecurityComplianceCecilTests.TestPluginCompliance(config);
+        }
+
+
+        /// <summary>
+        /// Returns the path to use for reading and writing temporary, on-disk files relating to the specific PluginFile.
+        /// </summary>
+        /// <returns>The path to the directory to use. The directory will NOT be created if it does not exist.</returns>
+        public static string GetTemporaryFilePathFor(PluginFile pluginFile)
+        {
+            return Path.Combine(PluginsTempFilesFolder, pluginFile.GetRelativePath());
         }
 
 

@@ -77,7 +77,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         #endregion
 
 
-        #region Convenience Methods
+        #region Convenient HPatchOperation creators
 
         /// <summary>
         /// Creates a new patch operation using the supplied target method, stub method, and patch location.
@@ -101,7 +101,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         {
             PatchOperations.Add(new HPatchOperation(targetType, targetMethodName, stubMethod, patchLocation));
         }
-        
+
         /// <summary>
         /// Creates a new patch operation using the supplied target method, stub method name from this class, and patch location.
         /// </summary>
