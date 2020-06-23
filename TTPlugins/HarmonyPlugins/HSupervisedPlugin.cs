@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
@@ -20,6 +21,11 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Relative path of the source file used to compile the plugin, which is used as a unique identity for plugin configuration and savedata.
         /// </summary>
         internal string SourceFileRelativePath { get; set; }
+
+        /// <summary>
+        /// The latest iteration of the runtime configuration in its xml state.
+        /// </summary>
+        internal XDocument LatestConfigurationXML { get; set; }
 
         /// <summary>
         /// Creates a new HSupervisedPlugin wrapped around the provided HPlugin.

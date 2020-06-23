@@ -137,7 +137,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         // Create an instance of the plugin
                         HPlugin pluginInstance = Activator.CreateInstance(pluginType) as HPlugin;
 
-                        // Find out if it had a relative path at compile time that we can use
+                        // Find out if it had a valid relative path at compile time that we can use
                         string sourceFileRelPath = null;
                         configuration.PluginTypesRelativePaths.TryGetValue(pluginType.FullName, out sourceFileRelPath);
                         
@@ -180,6 +180,9 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                 }
                             }
                         }
+
+                        // Hold onto the configuration xml doc
+                        supervisedPlugin.LatestConfigurationXML = pluginConfigurationDoc;
 
                         // Setup the Configuration object from the xml doc
                         HPluginConfiguration pluginConfiguration = new HPluginConfiguration(); // Create a new configuration with empty default values
@@ -325,9 +328,14 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         string savedataFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, LastConfiguation);
                         if (savedataFilePath != null)
                         {
-                            XDocument doc = new XDocument();
-                            doc.Add(supervisedPlugin.Plugin.Configuration.Savedata);
-                            doc.Save(savedataFilePath);
+                            // Remove old savedata
+                            XElement oldSavedata = supervisedPlugin.LatestConfigurationXML.Element("Savedata");
+                            if (oldSavedata != null)
+                                oldSavedata.Remove();
+
+                            // Add new savedata and write to disk
+                            supervisedPlugin.LatestConfigurationXML.Add(supervisedPlugin.Plugin.Configuration.Savedata);
+                            supervisedPlugin.LatestConfigurationXML.Save(savedataFilePath);
                         }
                     }
                 }
