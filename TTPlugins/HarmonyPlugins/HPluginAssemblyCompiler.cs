@@ -21,7 +21,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public static string TemporaryFilesPath { get; set; } = ".TTPluginsTemp_Compile";
 
         /// <summary>
-        /// Returns a list of assemblies compiled from the provided configuration.
+        /// Compiles and returns a list of assemblies using the provided configuration.
         /// </summary>
         /// <param name="configuration">The configuration to use when compiling.</param>
         /// <returns>The compiled assemblies.</returns>
@@ -67,14 +67,14 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 if (configuration.SingleAssemblyOutput)
                 {
                     compilerParams.OutputAssembly = "AllCompiledTTPlugins";
-                    CompileOnce(configuration, compilerParams, csProvider, result);
+                    CompileOnce(configuration.SourceFiles, compilerParams, csProvider, result);
                 }
                 else
                 {
                     foreach (string sourceFile in configuration.SourceFiles)
                     {
                         compilerParams.OutputAssembly = Path.GetFileNameWithoutExtension(sourceFile);
-                        CompileOnce(configuration, compilerParams, csProvider, result);
+                        CompileOnce(new List<string>() { sourceFile }, compilerParams, csProvider, result);
                     }
                 }
             }
@@ -90,9 +90,9 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             return result;
         }
         
-        private static void CompileOnce(HPluginCompilationConfiguration configuration, CompilerParameters compilerParams, CSharpCodeProvider csProvider, HPluginCompilationResult result)
+        private static void CompileOnce(List<string> sourceFiles, CompilerParameters compilerParams, CSharpCodeProvider csProvider, HPluginCompilationResult result)
         {
-            CompilerResults compileResult = csProvider.CompileAssemblyFromFile(compilerParams, configuration.SourceFiles.ToArray());
+            CompilerResults compileResult = csProvider.CompileAssemblyFromFile(compilerParams, sourceFiles.ToArray());
 
             if (compileResult.Errors.HasErrors)
             {
