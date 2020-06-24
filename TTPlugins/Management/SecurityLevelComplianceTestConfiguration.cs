@@ -12,7 +12,7 @@ namespace com.tiberiumfusion.ttplugins.Management
     public class SecurityLevelComplianceTestConfiguration
     {
         /// <summary>
-        /// List of PluginFiles to test.
+        /// List of PluginFiles to test. If any of these PluginFiles are source files, they will be compiled first.
         /// </summary>
         public List<PluginFile> PluginFilesToTest { get; set; }
 

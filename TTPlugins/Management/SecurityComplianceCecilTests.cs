@@ -323,7 +323,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                         comileConfig.SourceFiles.Add(pluginFile.PathToFile);
                         comileConfig.ReferencesOnDisk.Add(testConfig.TerrariaPath);
                         comileConfig.ReferencesInMemory.AddRange(testConfig.TerrariaDependencyAssemblies);
-                        if (firstCompile) // Write the Terraria dependencies to disk on the first compile...
+                        if (firstCompile && testConfig.PluginFilesToTest.Count > 1) // Write the Terraria dependencies to disk on the first compile...
                         {
                             comileConfig.ClearTemporaryFilesWhenDone = false;
                             comileConfig.ReuseTemporaryFiles = false;

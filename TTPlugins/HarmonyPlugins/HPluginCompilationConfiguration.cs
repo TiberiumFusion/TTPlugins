@@ -40,7 +40,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public List<byte[]> ReferencesInMemory { get; set; } = new List<byte[]>();
         
         /// <summary>
-        /// If true, the ReferencesInMemory that were written to temporary diskc copies will be deleted once the compile operation is complete.
+        /// If true, the ReferencesInMemory that were written to temporary disk copies will be deleted once the compile operation is complete.
         /// </summary>
         public bool ClearTemporaryFilesWhenDone { get; set; } = true;
 
