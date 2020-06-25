@@ -140,6 +140,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         // Find out if it had a valid relative path at compile time that we can use
                         string sourceFileRelPath = null;
                         configuration.PluginTypesRelativePaths.TryGetValue(pluginType.FullName, out sourceFileRelPath);
+                        if (sourceFileRelPath == null)
+                            sourceFileRelPath = "Unknown source file path.";
                         
                         // Wrap it up
                         HSupervisedPlugin supervisedPlugin = new HSupervisedPlugin(pluginInstance, sourceFileRelPath);
@@ -152,7 +154,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsThatFailedInitialize[supervisedPlugin.GetPluginSourceFilePath()] = e;
+                            result.HPluginsThatFailedInitialize[supervisedPlugin.SourceFileRelativePath] = e;
                             continue; // Skip over this plugin
                         }
 
@@ -176,7 +178,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                 }
                                 catch (Exception e)
                                 {
-                                    result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.GetPluginSourceFilePath()] = e;
+                                    result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SourceFileRelativePath] = e;
                                 }
                             }
                         }
@@ -196,7 +198,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.GetPluginSourceFilePath()] = e;
+                            result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SourceFileRelativePath] = e;
                             // In this case, the HPlugin will have a default HPluginConfiguration object with an empty savedata XElement
                         }
 
@@ -210,7 +212,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsThatThrewExceptions[supervisedPlugin.GetPluginSourceFilePath()] = e;
+                            result.HPluginsThatThrewExceptions[supervisedPlugin.SourceFileRelativePath] = e;
                             continue; // Skip over this plugin
                         }
 
@@ -222,7 +224,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         catch (Exception e)
                         {
-                            result.HPluginsThatThrewExceptions[supervisedPlugin.GetPluginSourceFilePath()] = e;
+                            result.HPluginsThatThrewExceptions[supervisedPlugin.SourceFileRelativePath] = e;
                             continue; // Skip over this plugin
                         }
 
@@ -234,7 +236,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             // Ensure both the target and patch stub MethodInfos exist
                             if (patchOp.TargetMethod == null || patchOp.StubMethod == null)
                             {
-                                result.HPluginsWithNullMethodInfos.Add(supervisedPlugin.GetPluginSourceFilePath());
+                                result.HPluginsWithNullMethodInfos.Add(supervisedPlugin.SourceFileRelativePath);
                                 continue; // Skip over this plugin
                             }
 
@@ -244,7 +246,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             {
                                 if (patchOp.TargetMethod.DeclaringType.Namespace.IndexOf(protectedNamespace) == 0)
                                 {
-                                    result.HPluginsThatBrokeRules[supervisedPlugin.GetPluginSourceFilePath()] = "Tried to patch protected namespace: \"" + protectedNamespace + "\"";
+                                    result.HPluginsThatBrokeRules[supervisedPlugin.SourceFileRelativePath] = "Tried to patch protected namespace: \"" + protectedNamespace + "\"";
                                     brokeRules = true;
                                     break;
                                 }
@@ -264,7 +266,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             }
                             catch (Exception e)
                             {
-                                result.HPluginsThatDidntPatch[supervisedPlugin.GetPluginSourceFilePath()] = e;
+                                result.HPluginsThatDidntPatch[supervisedPlugin.SourceFileRelativePath] = e;
                                 // Carry on to the next plugin
                             }
                         }

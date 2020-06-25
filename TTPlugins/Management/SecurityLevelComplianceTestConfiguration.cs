@@ -17,6 +17,11 @@ namespace com.tiberiumfusion.ttplugins.Management
         public List<PluginFile> PluginFilesToTest { get; set; }
 
         /// <summary>
+        /// Path to the root IO.PluginsUserFilesFolder directory that contains that SourceFiles.
+        /// </summary>
+        public string UserFilesRootDirectory { get; set; }
+
+        /// <summary>
         /// Path to Terraria.exe, which will be referenced by CodeDom during compilation.
         /// </summary>
         public string TerrariaPath { get; set; }

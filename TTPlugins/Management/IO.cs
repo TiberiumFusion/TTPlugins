@@ -485,8 +485,8 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// <returns>The relative path.</returns>
         public static string GetRelativeUserFilesPathFor(string fullPath)
         {
-            string standardizedFullPath = Path.GetFullPath(fullPath);
-            string standardizedRootDir = Path.GetFullPath(PluginsUserFilesFolder);
+            string standardizedFullPath = Path.GetFullPath(fullPath).ToLowerInvariant();
+            string standardizedRootDir = Path.GetFullPath(PluginsUserFilesFolder).ToLowerInvariant();
             int spot = standardizedFullPath.IndexOf(standardizedRootDir);
             if (spot >= 0)
                 return (standardizedFullPath.Substring(0, spot) + standardizedFullPath.Substring(spot + standardizedRootDir.Length)).TrimStart('\\', '/');

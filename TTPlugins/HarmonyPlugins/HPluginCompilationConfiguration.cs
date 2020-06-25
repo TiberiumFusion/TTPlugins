@@ -48,5 +48,15 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// If true, ReferencesInMemory won't be written to temporary disk copies, and the contents of the folder will be re-used instead.
         /// </summary>
         public bool ReuseTemporaryFiles { get; set; } = false;
+
+        /// <summary>
+        /// Directory where the compiled output files will be placed. Set to null to use the default.
+        /// </summary>
+        public string DiskOutputDirectory { get; set; } = null;
+
+        /// <summary>
+        /// If true, the generated assembly and its pdb will be deleted from the disk once the compilation has finished.
+        /// </summary>
+        public bool DeleteOutputFilesFromDiskWhenDone { get; set; } = true;
     }
 }

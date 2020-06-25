@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,16 +48,24 @@ namespace com.tiberiumfusion.ttplugins.Management
         }
 
         /// <summary>
-        /// Helper that creates an error message that describes a security level violation.
+        /// Creates an error message that describes a security level violation.
         /// </summary>
         /// <param name="typeDef">The Type that contains the offending Instruction.</param>
-        /// <param name="methodDef">The Method that contains the offendeing Instruction.</param>
+        /// <param name="methodDef">The Method that contains the offending Instruction.</param>
         /// <param name="ins">The offending Instruction.</param>
         /// <param name="remarks">Additional info.</param>
         /// <returns>The created error message.</returns>
         private static string CreateInstructionViolationMessage(TypeDefinition typeDef, MethodDefinition methodDef, Instruction ins, string remarks)
         {
-            return "Violation in Type: \"" + typeDef.FullName + "\" in Method: \"" + methodDef.Name + "\" at Instruction: " + ins.ToString() + "; Remarks: " + remarks;
+            string location = "";
+            if (ins.SequencePoint != null && ins.SequencePoint.Document != null)
+                location = "\nLocation: " + ins.SequencePoint.Document.Url + " at line(s) " + ins.SequencePoint.StartLine + "-" + ins.SequencePoint.EndLine + ", position " + ins.SequencePoint.StartColumn;
+
+            return "Violation in Type: " + typeDef.FullName
+                 + "\n    in Method: " + methodDef.Name
+                 + "\n    at Instruction: " + ins.ToString()
+                 + "\nRemarks: " + remarks
+                 + location;
         }
 
         /// <summary>
@@ -305,37 +312,47 @@ namespace com.tiberiumfusion.ttplugins.Management
         public static SecurityLevelComplianceTestsResults TestPluginCompliance(SecurityLevelComplianceTestConfiguration testConfig)
         {
             SecurityLevelComplianceTestsResults allResults = new SecurityLevelComplianceTestsResults();
-
+            
             bool firstCompile = true;
             foreach (PluginFile pluginFile in testConfig.PluginFilesToTest)
             {
                 SecurityLevelComplianceSingleTestResult singleResult = new SecurityLevelComplianceSingleTestResult(pluginFile);
+                allResults.IndividualResults[pluginFile] = singleResult;
 
                 try
                 {
                     byte[] asmBytesToTest = null;
 
                     // If source file, compile it
+                    HPluginCompilationResult compileResult = null;
                     if (pluginFile.FileType == PluginFileType.CSSourceFile)
                     {
-                        HPluginCompilationConfiguration comileConfig = new HPluginCompilationConfiguration();
-                        comileConfig.SingleAssemblyOutput = true;
-                        comileConfig.SourceFiles.Add(pluginFile.PathToFile);
-                        comileConfig.ReferencesOnDisk.Add(testConfig.TerrariaPath);
-                        comileConfig.ReferencesInMemory.AddRange(testConfig.TerrariaDependencyAssemblies);
+                        HPluginCompilationConfiguration compileConfig = new HPluginCompilationConfiguration();
+                        compileConfig.SingleAssemblyOutput = true;
+                        compileConfig.SourceFiles.Add(pluginFile.PathToFile);
+                        compileConfig.UserFilesRootDirectory = testConfig.UserFilesRootDirectory;
+                        compileConfig.SingleAssemblyOutput = true;
+                        compileConfig.DeleteOutputFilesFromDiskWhenDone = false; // Keep the output files so we can load the PDBs for the cecil-based security tests
+                        compileConfig.ReferencesOnDisk.Add(testConfig.TerrariaPath);
+                        compileConfig.ReferencesInMemory.AddRange(testConfig.TerrariaDependencyAssemblies);
                         if (firstCompile && testConfig.PluginFilesToTest.Count > 1) // Write the Terraria dependencies to disk on the first compile...
                         {
-                            comileConfig.ClearTemporaryFilesWhenDone = false;
-                            comileConfig.ReuseTemporaryFiles = false;
+                            compileConfig.ClearTemporaryFilesWhenDone = false;
+                            compileConfig.ReuseTemporaryFiles = false;
                         }
                         else // ...and reuse them on subsequent compiles. They will be finally deleted with HPluginAssemblyCompiler.ClearTemporaryCompileFiles() at the end of these tests.
                         {
-                            comileConfig.ClearTemporaryFilesWhenDone = false;
-                            comileConfig.ReuseTemporaryFiles = true;
+                            compileConfig.ClearTemporaryFilesWhenDone = false;
+                            compileConfig.ReuseTemporaryFiles = true;
                         }
-                        HPluginCompilationResult compileResult = HPluginAssemblyCompiler.Compile(comileConfig);
+                        compileResult = HPluginAssemblyCompiler.Compile(compileConfig);
                         if (compileResult.CompiledAssemblies.Count == 0)
                         {
+                            // Clean up
+                            HPluginAssemblyCompiler.ClearTemporaryCompileFiles();
+                            HPluginAssemblyCompiler.TryRemoveDirectory(compileResult.OutputDirectory);
+
+                            // Note down the compile failure
                             singleResult.CompileFailure = true;
                             if (compileResult.CompileErrors.Count > 0)
                             {
@@ -353,12 +370,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                         {
                             // Turn the Assembly into a byte array
                             Assembly asmToTest = compileResult.CompiledAssemblies[0];
-                            BinaryFormatter formatter = new BinaryFormatter();
-                            using (MemoryStream memStream = new MemoryStream())
-                            {
-                                formatter.Serialize(memStream, asmToTest);
-                                asmBytesToTest = memStream.ToArray();
-                            }
+                            asmBytesToTest = asmToTest.ToByteArray();
                         }
                     }
                     // If already a compiled assembly, load its bytes
@@ -374,55 +386,70 @@ namespace com.tiberiumfusion.ttplugins.Management
                             }
                         }
                     }
-                    
+
                     if (asmBytesToTest == null) // Can't test assemblies that failed to load
                         continue;
 
                     ///// Check security compliance with Cecil
                     using (MemoryStream memStream = new MemoryStream(asmBytesToTest))
                     {
-                        AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(memStream);
+                        // Try to load the compiled assembly's associated pdb file (if one exists)
+                        string pdbPath = null;
+                        if (pluginFile.FileType == PluginFileType.CSSourceFile)
+                        {
+                            // Since we used SingleAssemblyOutput and we're only testing one plugin at a time, there should be only one pdb file in the compiler's output.
+                            pdbPath = compileResult.OutputFilesOnDisk.Where(x => Path.GetExtension(x) == ".pdb").FirstOrDefault();
+                        }
+                        else if (pluginFile.FileType == PluginFileType.CompiledAssemblyFile)
+                        {
+                            string dllPath = pluginFile.PathToFile;
+                            string checkPdbPath = "";
+                            int spot = dllPath.LastIndexOf(".dll");
+                            if (spot > -1)
+                                checkPdbPath = dllPath.Substring(0, spot) + ".pdb";
+                            if (File.Exists(checkPdbPath))
+                                pdbPath = checkPdbPath;
+                        }
 
-                        // Run tests
-                        if (testConfig.RunLevel1Test)
+                        AssemblyDefinition asmDef = null;
+                        if (pdbPath != null)
                         {
-                            SecurityComplianceSingleCecilTestResult level1TestResults = SecurityComplianceCecilTests.TestLevel1(asmDef);
-                            singleResult.TestedLevel1 = true;
-                            singleResult.PassLevel1 = level1TestResults.Passed;
-                            singleResult.MessagesLevel1.AddRange(level1TestResults.Messages);
+                            // Run tests with the pdb to get helpful info like line numbers
+                            using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                            {
+                                ReaderParameters readerParameters = new ReaderParameters();
+                                readerParameters.ReadSymbols = true;
+                                readerParameters.SymbolStream = pdbStream;
+                                asmDef = AssemblyDefinition.ReadAssembly(memStream, readerParameters);
+
+                                RunCecilTests(testConfig, asmDef, singleResult);
+                            }
                         }
-                        if (testConfig.RunLevel2Test)
+                        else
                         {
-                            SecurityComplianceSingleCecilTestResult level2TestResults = SecurityComplianceCecilTests.TestLevel2(asmDef);
-                            singleResult.TestedLevel2 = true;
-                            singleResult.PassLevel2 = level2TestResults.Passed;
-                            singleResult.MessagesLevel2.AddRange(level2TestResults.Messages);
-                        }
-                        if (testConfig.RunLevel3Test)
-                        {
-                            SecurityComplianceSingleCecilTestResult level3TestResults = SecurityComplianceCecilTests.TestLevel3(asmDef);
-                            singleResult.TestedLevel3 = true;
-                            singleResult.PassLevel3 = level3TestResults.Passed;
-                            singleResult.MessagesLevel3.AddRange(level3TestResults.Messages);
-                        }
-                        if (testConfig.RunLevel4Test)
-                        {
-                            SecurityComplianceSingleCecilTestResult level4TestResults = SecurityComplianceCecilTests.TestLevel4(asmDef);
-                            singleResult.TestedLevel4 = true;
-                            singleResult.PassLevel4 = level4TestResults.Passed;
-                            singleResult.MessagesLevel4.AddRange(level4TestResults.Messages);
+                            // Run tests without a pdb and just have generic error messages
+                            asmDef = AssemblyDefinition.ReadAssembly(memStream);
+
+                            RunCecilTests(testConfig, asmDef, singleResult);
                         }
 
                         // Make an aggregated generic messag for the user
                         string overallResult = "Final security level test results >> ";
-                        overallResult += "Security Level 1: " + (singleResult.TestedLevel1 ? (singleResult.PassLevel1 ? "Compliant" : "Violated") : "Untested");
-                        overallResult += "; Security Level 2: " + (singleResult.TestedLevel2 ? (singleResult.PassLevel2 ? "Compliant" : "Violated") : "Untested");
-                        overallResult += "; Security Level 3: " + (singleResult.TestedLevel3 ? (singleResult.PassLevel3 ? "Compliant" : "Violated") : "Untested");
-                        overallResult += "; Security Level 4: " + (singleResult.TestedLevel4 ? (singleResult.PassLevel4 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += "Level 1: " + (singleResult.TestedLevel1 ? (singleResult.PassLevel1 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += "; Level 2: " + (singleResult.TestedLevel2 ? (singleResult.PassLevel2 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += "; Level 3: " + (singleResult.TestedLevel3 ? (singleResult.PassLevel3 ? "Compliant" : "Violated") : "Untested");
+                        overallResult += "; Level 4: " + (singleResult.TestedLevel4 ? (singleResult.PassLevel4 ? "Compliant" : "Violated") : "Untested");
                         overallResult += ".";
                         singleResult.GenericMessages.Add(overallResult);
 
                         // All done
+                    }
+
+                    // Clear the on-disk output files that were generated during the assembly compile
+                    if (Directory.Exists(compileResult.OutputDirectory))
+                    {
+                        DirectoryInfo topDirInfo = new DirectoryInfo(compileResult.OutputDirectory);
+                        topDirInfo.Delete(true);
                     }
                 }
                 catch (Exception e)
@@ -430,10 +457,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                     singleResult.GenericTestFailure = true;
                     singleResult.GenericMessages.Add("Unexpected error during security level testing: " + e.ToString());
                 }
-
-                // Add single test result to final collection
-                allResults.IndividualResults[pluginFile] = singleResult;
-
+                
                 firstCompile = false;
             }
 
@@ -441,6 +465,45 @@ namespace com.tiberiumfusion.ttplugins.Management
             HPluginAssemblyCompiler.ClearTemporaryCompileFiles();
 
             return allResults;
+        }
+
+        /// <summary>
+        /// Excised section from TestPluginCompliance. Tests the specified AssemblyDefinition against all chosen security tests.
+        /// </summary>
+        /// <param name="testConfig">Mirror.</param>
+        /// <param name="asmDef">Mirror.</param>
+        /// <param name="singleResult">Mirror.</param>
+        private static void RunCecilTests(SecurityLevelComplianceTestConfiguration testConfig, AssemblyDefinition asmDef, SecurityLevelComplianceSingleTestResult singleResult)
+        {
+            // Run the tests
+            if (testConfig.RunLevel1Test)
+            {
+                SecurityComplianceSingleCecilTestResult level1TestResults = SecurityComplianceCecilTests.TestLevel1(asmDef);
+                singleResult.TestedLevel1 = true;
+                singleResult.PassLevel1 = level1TestResults.Passed;
+                singleResult.MessagesLevel1.AddRange(level1TestResults.Messages);
+            }
+            if (testConfig.RunLevel2Test)
+            {
+                SecurityComplianceSingleCecilTestResult level2TestResults = SecurityComplianceCecilTests.TestLevel2(asmDef);
+                singleResult.TestedLevel2 = true;
+                singleResult.PassLevel2 = level2TestResults.Passed;
+                singleResult.MessagesLevel2.AddRange(level2TestResults.Messages);
+            }
+            if (testConfig.RunLevel3Test)
+            {
+                SecurityComplianceSingleCecilTestResult level3TestResults = SecurityComplianceCecilTests.TestLevel3(asmDef);
+                singleResult.TestedLevel3 = true;
+                singleResult.PassLevel3 = level3TestResults.Passed;
+                singleResult.MessagesLevel3.AddRange(level3TestResults.Messages);
+            }
+            if (testConfig.RunLevel4Test)
+            {
+                SecurityComplianceSingleCecilTestResult level4TestResults = SecurityComplianceCecilTests.TestLevel4(asmDef);
+                singleResult.TestedLevel4 = true;
+                singleResult.PassLevel4 = level4TestResults.Passed;
+                singleResult.MessagesLevel4.AddRange(level4TestResults.Messages);
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
         #endregion
 
-
+        
         #region Ctor
 
         /// <summary>
@@ -72,16 +72,6 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         protected void SaveConfigurationToDisk()
         {
             HPluginApplicator.WriteConfigurationForHPlugin(this);
-        }
-
-        /// <summary>
-        /// Returns the full path of the file that was used to compile this type.
-        /// </summary>
-        /// <param name="sourcePath">Leave unset. Automatically filled by CompilerServices.</param>
-        /// <returns>The full path of the file that was used to compile this type.</returns>
-        internal string GetSourceFilePath([System.Runtime.CompilerServices.CallerFilePath] string sourcePath = "")
-        {
-            return sourcePath;
         }
 
         #endregion

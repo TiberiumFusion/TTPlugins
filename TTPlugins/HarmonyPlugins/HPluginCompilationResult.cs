@@ -32,5 +32,15 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Dictionary that maps the full name of each compiled HPlugin to the relative path of the source file used to compile it.
         /// </summary>
         public Dictionary<string, string> CompiledTypesSourceFileRelativePaths { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// A list of the paths of all output files generated during the compile process. Will include both assembly DLLs and their corresponding PDBs.
+        /// </summary>
+        public List<string> OutputFilesOnDisk { get; set; } = new List<string>();
+
+        /// <summary>
+        /// The root directory containing the files in OutputFilesOnDisk.
+        /// </summary>
+        public string OutputDirectory { get; set; }
     }
 }

@@ -37,17 +37,5 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             Plugin = plugin;
             SourceFileRelativePath = sourceFileRelativePath;
         }
-
-        /// <summary>
-        /// Returns the path to the source file that was used to compile the supervised HPlugin.
-        /// </summary>
-        /// <returns>The path to the source file that was used to compile the supervised HPlugin.</returns>
-        internal string GetPluginSourceFilePath()
-        {
-            string sourcePath = "";
-            try { sourcePath = Plugin.GetSourceFilePath(); }
-            catch (Exception e) { sourcePath = "Unknown plugin source file path."; };
-            return sourcePath;
-        }
     }
 }
