@@ -142,6 +142,24 @@ namespace com.tiberiumfusion.ttplugins.Management
         }
 
 
+        /// <summary>
+        /// Returns the PluginFile in FoundUserPluginFiles that has the provided relpath.
+        /// </summary>
+        /// <param name="relpath">The relpath identifier to use.</param>
+        /// <returns>The matched PluginFile, no null if none was found.</returns>
+        public static PluginFile GetPluginFileByRelPath(string relpath)
+        {
+            foreach (PluginFile pluginFile in FoundUserPluginFiles)
+            {
+                if (pluginFile.GetRelativePath().ToLowerInvariant() == relpath.ToLowerInvariant())
+                {
+                    return pluginFile;
+                }
+            }
+            return null;
+        }
+
+
         #region File System Watchers
 
         /// <summary>

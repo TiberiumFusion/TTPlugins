@@ -18,8 +18,8 @@ namespace com.tiberiumfusion.ttplugins
         {
             try
             {
-                MethodInfo asmGetRawByts = assembly.GetType().GetMethod("GetRawBytes", BindingFlags.Instance | BindingFlags.NonPublic);
-                object bytesObject = asmGetRawByts.Invoke(assembly, null);
+                MethodInfo asmGetRawBytes = assembly.GetType().GetMethod("GetRawBytes", BindingFlags.Instance | BindingFlags.NonPublic);
+                object bytesObject = asmGetRawBytes.Invoke(assembly, null);
                 return (byte[])bytesObject;
             }
             catch (Exception e)
