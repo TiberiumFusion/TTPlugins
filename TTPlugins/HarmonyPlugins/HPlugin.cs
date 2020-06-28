@@ -163,7 +163,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
         /// <summary>
         /// Called by the HPlugin applicator immediately before the plugin's PatchOperations are executed.
-        /// If the plugin has not defined by its PatchOperations by this point, it must do so now, or nothing will be patched.
+        /// If the plugin has not defined its PatchOperations by this point, it must do so now, or nothing will be patched.
         /// </summary>
         public virtual void PrePatch() { }
 

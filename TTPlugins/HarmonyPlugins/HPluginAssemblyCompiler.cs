@@ -131,7 +131,16 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 {
                     foreach (string sourceFile in configuration.SourceFiles)
                     {
-                        string dllName = "TTPlugins_CompiledAsm_" + Path.GetFileNameWithoutExtension(sourceFile) + ".dll";
+                        int numShift = 0;
+                        string originDllName = "TTPlugins_CompiledAsm_" + Path.GetFileNameWithoutExtension(sourceFile);
+                        string dllName = originDllName;
+                        string checkDllOutput = Path.Combine(outputDir, dllName + ".dll");
+                        while (File.Exists(checkDllOutput)) // Ensure no file conflicts
+                        {
+                            numShift++;
+                            dllName = originDllName + numShift;
+                            checkDllOutput = Path.Combine(outputDir, dllName + ".dll");
+                        }
                         string pdbName = Path.GetFileNameWithoutExtension(dllName) + ".pdb";
                         string dllOutput = Path.Combine(outputDir, dllName);
                         string pdbOutput = Path.Combine(outputDir, pdbName);
