@@ -37,5 +37,10 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Path to the root folder to use for temporary plugin files (i.e. temporary configuration & savedata copies).
         /// </summary>
         public string PluginTemporaryFilesRootDirectory { get; set; }
+        
+        /// <summary>
+        /// The name of the file containing a plugin's runtime configuration file, within its temporary files directory.
+        /// </summary>
+        public string PluginRuntimeConfigFileName { get; set; } = "RuntimeConfiguration.xml";
     }
 }

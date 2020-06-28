@@ -310,7 +310,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             
             string tempFolder = Path.Combine(applicatorConfiguration.PluginTemporaryFilesRootDirectory, supervisedPlugin.SourceFileRelativePath);
             Directory.CreateDirectory(tempFolder); // Ensure directory exists
-            string configurationXMLFilePath = Path.Combine(tempFolder, "RuntimeConfiguration.xml");
+            string configurationXMLFilePath = Path.Combine(tempFolder, applicatorConfiguration.PluginRuntimeConfigFileName);
             return configurationXMLFilePath;
         }
 
