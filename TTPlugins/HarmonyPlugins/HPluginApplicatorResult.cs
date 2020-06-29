@@ -91,9 +91,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
     {
         Success = 0,
         GenericFailure = 1000,
-        DependencyAssemblyLoadFailure = 1001,
-        CreateHarmonyInstanceFailure = 1002,
-        UsercodeAssemblyLoadError = 1003,
+        CreateHarmonyInstanceFailure = 1001,
+        UsercodeAssemblyLoadError = 1002,
         GenericHPluginApplicationFailure = 2000,
     }
 }

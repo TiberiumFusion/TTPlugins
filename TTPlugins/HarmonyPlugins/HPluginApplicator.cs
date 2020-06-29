@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,6 +16,11 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
     public static class HPluginApplicator
     {
         #region Vars
+
+        /// <summary>
+        /// The executing Terraria assembly.
+        /// </summary>
+        internal static Assembly TerrariaAssembly { get; private set; }
 
         /// <summary>
         /// The Harmony instance which was created during patch application
@@ -45,6 +51,21 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             "com.tiberiumfusion",
             "HarmonyLib"
         };
+
+        /// <summary>
+        /// The Harmony assembly that was embedded into Terraria by TTApplicator.
+        /// </summary>
+        internal static Assembly EmbeddedHarmonyAssembly { get; private set; }
+
+        /// <summary>
+        /// A list of all plugin assemblies that were embedded into Terraria by TTApplicator.
+        /// </summary>
+        internal static List<Assembly> EmbeddedPluginAssemblies { get; private set; }
+
+        /// <summary>
+        /// A list of the bytes of all plugin assemblies that were embedded into Terraria by TTApplicator.
+        /// </summary>
+        internal static List<byte[]> EmbeddedPluginAssemblyBytes { get; private set; }
 
         #endregion
 
@@ -78,6 +99,99 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         #region Patch Application
 
         /// <summary>
+        /// Method which TTApplicator will patch Terraria into calling. This method will create a HPluginApplicatorConfiguration and call ApplyPatches.
+        /// </summary>
+        public static void EntryPointForTerraria()
+        {
+            // At this point, the MSIL patch has loaded TTPlugins from the embedded resources in order to call this static method.
+            // We now need to load the rest of what TTApplicator has embedded before calling ApplyPatches
+
+            System.Diagnostics.Debugger.Launch();
+
+            try
+            {
+                TerrariaAssembly = Assembly.GetCallingAssembly();
+
+                // Extract Harmony
+                EmbeddedHarmonyAssembly = null;
+                using (var resStream = TerrariaAssembly.GetManifestResourceStream("TTPlugins_0Harmony.dll"))
+                {
+                    using (var memStream = new MemoryStream())
+                    {
+                        resStream.CopyTo(memStream);
+                        byte[] asmBytes = memStream.ToArray();
+                        EmbeddedHarmonyAssembly = Assembly.Load(asmBytes);
+                    }
+                }
+
+                // Extract plugins assmblies config doc
+                XDocument pluginAssembliesConfig = null;
+                using (var resStream = TerrariaAssembly.GetManifestResourceStream("TTPlugins_EmbeddedPluginsConfig.xml"))
+                {
+                    pluginAssembliesConfig = XDocument.Load(resStream);
+                }
+
+                // Load the gac assemblies specified in the config doc into the appdomain
+                XElement configDocBase = pluginAssembliesConfig.Element("Base");
+                XElement GACAssembliesToLoad = configDocBase.Element("GACAssembliesToLoad");
+                foreach (XElement asmNameElement in GACAssembliesToLoad.Nodes())
+                {
+                    string fullAsmName = asmNameElement.Value;
+                    try { Assembly.Load(fullAsmName); }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine("Failed to load common assembly: " + fullAsmName);
+                    }
+                }
+
+                // Extract and load the plugin assemblies specifiec in the config doc into the appdomain
+                EmbeddedPluginAssemblies = new List<Assembly>();
+                EmbeddedPluginAssemblyBytes = new List<byte[]>();
+                XElement PluginAsmResourceNames = configDocBase.Element("PluginAsmResourceNames");
+                foreach (XElement resNameElement in PluginAsmResourceNames.Nodes())
+                {
+                    string resourceName = resNameElement.Value;
+                    using (var resStream = TerrariaAssembly.GetManifestResourceStream(resourceName))
+                    {
+                        using (var memStream = new MemoryStream())
+                        {
+                            resStream.CopyTo(memStream);
+                            byte[] asmBytes = memStream.ToArray();
+                            EmbeddedPluginAssemblyBytes.Add(asmBytes);
+                            Assembly pluginAsm = Assembly.Load(asmBytes);
+                            EmbeddedPluginAssemblies.Add(pluginAsm);
+                        }
+                    }
+                }
+
+                // Get temporary plugin files root dir from the config doc
+                string pluginTemporaryFilesRootDir = configDocBase.Element("PluginTemporaryFilesRootDir").Value;
+
+                // Get the hplugin full type name -> plugin relpath mapping from the config doc
+                Dictionary<string, string> pluginTypeRelPathMap = new Dictionary<string, string>();
+                XElement hpluginTypeNameRelPathMap = configDocBase.Element("HPluginTypeNameRelPathMap");
+                foreach (XElement item in hpluginTypeNameRelPathMap.Nodes())
+                {
+                    string typeFullName = item.Attribute("TypeFullName").Value;
+                    string relpath = item.Value;
+                    pluginTypeRelPathMap[typeFullName] = relpath;
+                }
+
+                // Create the plugin applicator config and hit the go button
+                HPluginApplicatorConfiguration applicatorConfig = new HPluginApplicatorConfiguration();
+                applicatorConfig.ExecutingTerrariaAssembly = TerrariaAssembly;
+                applicatorConfig.AllUsercodeAssemblies = EmbeddedPluginAssemblyBytes;
+                applicatorConfig.PluginTemporaryFilesRootDirectory = pluginTemporaryFilesRootDir;
+                applicatorConfig.PluginTypesRelativePaths = pluginTypeRelPathMap;
+                ApplyPatches(applicatorConfig);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error while applying TTPlugins in EntryPointFromTerraria, details: " + e);
+            }
+        }
+
+        /// <summary>
         /// Applies all HPlugins from the provided compiled assemblies.
         /// </summary>
         public static HPluginApplicatorResult ApplyPatches(HPluginApplicatorConfiguration configuration)
@@ -88,19 +202,6 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
             // Fix weird missing assembly issues
             SetupDomainAssemblyResolver();
-
-
-            // Load all Terraria assemblies & dependencies into our AppDomain (will include Terraria + its extracted embedded dependencies)
-            try
-            {
-                foreach (byte[] asmBytes in configuration.AllDependencyAssemblyBytes)
-                    Assembly.Load(asmBytes);
-            }
-            catch (Exception e)
-            {
-                result.ConfigureAsFailure(HPluginApplicatorResultCodes.DependencyAssemblyLoadFailure, e);
-                return result;
-            }
             
 
             // Create a harmony instance
@@ -115,10 +216,13 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             }
 
 
-            // Find all HPlugins in the compiled assemblies
+            // Find all HPlugins in the compiled assemblies and apply them
             AppliedHPlugins.Clear();
             try
             {
+                // Map of each relpath to the plugin config that was loaded for it. Allows for reusing of already loaded configs for multiple types that share the same relpath (i.e. several classes in the same plugin assembly).
+                Dictionary<string, XDocument> relpathToLoadedPluginConfig = new Dictionary<string, XDocument>();
+
                 foreach (byte[] usercodeAsmBytes in configuration.AllUsercodeAssemblies)
                 {
                     // Try to create the assembly from its bytes
@@ -131,6 +235,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     }
 
                     // Find all HPlugins in the usercode assembly
+                    const string unknownRelPathString = "Unknown source file path.";
                     List<Type> foundPluginTypes = usercodeAsm.GetTypes().Where(t => t.IsClass && t.IsSubclassOf(typeof(HPlugin))).ToList();
                     foreach (Type pluginType in foundPluginTypes)
                     {
@@ -141,7 +246,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         string sourceFileRelPath = null;
                         configuration.PluginTypesRelativePaths.TryGetValue(pluginType.FullName, out sourceFileRelPath);
                         if (sourceFileRelPath == null)
-                            sourceFileRelPath = "Unknown source file path.";
+                            sourceFileRelPath = unknownRelPathString;
                         
                         // Wrap it up
                         HSupervisedPlugin supervisedPlugin = new HSupervisedPlugin(pluginInstance, sourceFileRelPath);
@@ -167,18 +272,27 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         {
                             if (supervisedPlugin.SourceFileRelativePath != null)
                             {
-                                // Try to load the plugin configuration from the disk
-                                try
+                                // First check if the config for this relpath was already loaded
+                                XDocument cachedConfigDoc = null;
+                                if (relpathToLoadedPluginConfig.TryGetValue(supervisedPlugin.SourceFileRelativePath, out cachedConfigDoc) && supervisedPlugin.SourceFileRelativePath != unknownRelPathString)
                                 {
-                                    string configurationXMLFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, configuration);
-                                    if (File.Exists(configurationXMLFilePath)) // Load config if it exists
-                                        pluginConfigurationDoc = XDocument.Load(configurationXMLFilePath);
-
-                                    successfulConfigLoad = true;
+                                    pluginConfigurationDoc = cachedConfigDoc;
                                 }
-                                catch (Exception e)
+                                else
                                 {
-                                    result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SourceFileRelativePath] = e;
+                                    // Try to load the plugin configuration from the disk
+                                    try
+                                    {
+                                        string configurationXMLFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, configuration);
+                                        if (File.Exists(configurationXMLFilePath)) // Load config if it exists
+                                            pluginConfigurationDoc = XDocument.Load(configurationXMLFilePath);
+
+                                        successfulConfigLoad = true;
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        result.HPluginsWithFailedConfigurationLoads[supervisedPlugin.SourceFileRelativePath] = e;
+                                    }
                                 }
                             }
                         }
@@ -263,6 +377,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                     HarmonyInstance.Patch(patchOp.TargetMethod, new HarmonyLib.HarmonyMethod(patchOp.StubMethod));
                                 else if (patchOp.PatchLocation == HPatchLocation.Postfix)
                                     HarmonyInstance.Patch(patchOp.TargetMethod, null, new HarmonyLib.HarmonyMethod(patchOp.StubMethod));
+
+                                AppliedHPlugins.Add(supervisedPlugin);
                             }
                             catch (Exception e)
                             {
@@ -295,7 +411,16 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         private static XDocument CreateBlankPluginSavedataDoc()
         {
             XDocument pluginConfigurationDoc = new XDocument();
-            pluginConfigurationDoc.Add(new XElement("Savedata"));
+
+            XElement baseElement = new XElement("PluginConfig");
+            baseElement.SetAttributeValue("RelPath", "Unknown");
+            pluginConfigurationDoc.Add(baseElement);
+
+            XElement savedataElement = new XElement("Savedata");
+            savedataElement.Add(new XComment("This <Savedata> element contains the persistent savedata for this plugin."));
+            savedataElement.Add(new XComment("If you are manually editing this savedata, do NOT modify the top-level <Savedata> element!"));
+            baseElement.Add(savedataElement);
+
             return pluginConfigurationDoc;
         }
         

@@ -26,25 +26,67 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Name of the output folder which will be created to contain the generated dll and pdb files from the compile process.
         /// </summary>
         public static string DefaultOutputFilesDirectory { get; set; } = ".TTPlugins_CompileOutput";
-        
+
+
+        #region Some Assembly Loading
 
         /// <summary>
-        /// Attempts to load the specific assemblies which Terraria references (and potentially some others) into the current AppDomain.
+        /// Attempts to load the specific assemblies which Terraria references into the current AppDomain for plugin compilation.
         /// Only loads "regular" assemblies, i.e. those that exist on-disk and are not embedded in Terraria itself.
         /// </summary>
-        public static void LoadReferencesForCompilingPlugins()
+        public static void TryLoadDotNetTerrariaReferences()
         {
-            // Load all of Terraria's explicit references (should be in the gac) that aren't embedded dependency assemblies
-            Assembly.Load("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-            Assembly.Load("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-            Assembly.Load("System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-            Assembly.Load("System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-            Assembly.Load("WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
-            Assembly.Load("Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553");
-            Assembly.Load("Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553");
-            Assembly.Load("Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553");
-            Assembly.Load("Microsoft.Xna.Framework.Xact, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553");
+            List<string> terrariaReferences = new List<string>()
+            {
+                "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                "System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                "Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553",
+                "Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553",
+                "Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553",
+                "Microsoft.Xna.Framework.Xact, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553",
+            };
+            foreach (string asmName in terrariaReferences)
+            {
+                try { Assembly.Load(asmName); }
+                catch (Exception e) { } // This shouldn't happen, but just in case.
+            }
         }
+
+        /// <summary>
+        /// Attempts to load some of the more common .NET assemblies into the current AppDomain for plugin compilation.
+        /// </summary>
+        public static void TryLoadCommonDotNetAssemblies()
+        {
+            List<string> commonDotNetAsms = new List<string>()
+            {
+                "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Data.DataSetExtensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Data.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                "System.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                "System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                "System.Numerics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                "System.Windows, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                "System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Windows.Presentation, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Xml.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "System.Xml.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+            };
+            foreach (string asmName in commonDotNetAsms)
+            {
+                try { Assembly.Load(asmName); }
+                catch (Exception e) { } // This shouldn't happen, but just in case.
+            }
+        }
+
+        #endregion
 
 
         /// <summary>
@@ -63,7 +105,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             try
             {
                 // Load all potentially required assemblies into our appdomain
-                LoadReferencesForCompilingPlugins();
+                TryLoadDotNetTerrariaReferences();
 
                 // Compiler configuration
                 CompilerParameters compilerParams = new CompilerParameters();
@@ -123,16 +165,18 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     string dllOutput = Path.Combine(outputDir, dllName);
                     string pdbOutput = Path.Combine(outputDir, pdbName);
                     compilerParams.OutputAssembly = dllOutput;
-                    result.OutputFilesOnDisk.Add(dllOutput);
-                    result.OutputFilesOnDisk.Add(pdbOutput);
-                    CompileOnce(configuration.SourceFiles, configuration, compilerParams, csProvider, result);
+                    if (CompileOnce(configuration.SourceFiles, configuration, compilerParams, csProvider, result))
+                    {
+                        result.OutputFilesOnDisk.Add(dllOutput);
+                        result.OutputFilesOnDisk.Add(pdbOutput);
+                    }
                 }
                 else
                 {
                     foreach (string sourceFile in configuration.SourceFiles)
                     {
                         int numShift = 0;
-                        string originDllName = "TTPlugins_CompiledAsm_" + Path.GetFileNameWithoutExtension(sourceFile);
+                        string originDllName = "TTPlugins_CompiledAsm_" + Path.GetFileNameWithoutExtension(sourceFile).Replace(' ', '_');
                         string dllName = originDllName;
                         string checkDllOutput = Path.Combine(outputDir, dllName + ".dll");
                         while (File.Exists(checkDllOutput)) // Ensure no file conflicts
@@ -141,13 +185,16 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             dllName = originDllName + numShift;
                             checkDllOutput = Path.Combine(outputDir, dllName + ".dll");
                         }
+                        dllName += ".dll";
                         string pdbName = Path.GetFileNameWithoutExtension(dllName) + ".pdb";
                         string dllOutput = Path.Combine(outputDir, dllName);
                         string pdbOutput = Path.Combine(outputDir, pdbName);
                         compilerParams.OutputAssembly = dllOutput;
-                        result.OutputFilesOnDisk.Add(dllOutput);
-                        result.OutputFilesOnDisk.Add(pdbOutput);
-                        CompileOnce(new List<string>() { sourceFile }, configuration, compilerParams, csProvider, result);
+                        if (CompileOnce(new List<string>() { sourceFile }, configuration, compilerParams, csProvider, result))
+                        {
+                            result.OutputFilesOnDisk.Add(dllOutput);
+                            result.OutputFilesOnDisk.Add(pdbOutput);
+                        }
                     }
                 }
             }
@@ -170,14 +217,16 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             return result;
         }
         
-        private static void CompileOnce(List<string> sourceFiles, HPluginCompilationConfiguration configuration, CompilerParameters compilerParams, CSharpCodeProvider csProvider, HPluginCompilationResult result)
+        private static bool CompileOnce(List<string> sourceFiles, HPluginCompilationConfiguration configuration, CompilerParameters compilerParams, CSharpCodeProvider csProvider, HPluginCompilationResult result)
         {
             CompilerResults compileResult = csProvider.CompileAssemblyFromFile(compilerParams, sourceFiles.ToArray());
+            bool compileSuccess = true;
 
             if (compileResult.Errors.HasErrors)
             {
                 foreach (CompilerError error in compileResult.Errors)
                     result.CompileErrors.Add(error);
+                compileSuccess = false;
             }
             else
             {
@@ -223,9 +272,12 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                         if (foundSourcePath != null)
                                             break;
 
-                                        if (methodDef.Body.Instructions.Count > 0)
+                                        foreach (Instruction ins in methodDef.Body.Instructions)
                                         {
-                                            SequencePoint seqPoint = methodDef.Body.Instructions[0].SequencePoint;
+                                            if (foundSourcePath != null)
+                                                break;
+
+                                            SequencePoint seqPoint = ins.SequencePoint;
                                             if (seqPoint != null)
                                             {
                                                 if (seqPoint.Document != null)
@@ -252,6 +304,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 }
                 catch (Exception e) { } // Swallow. Persistent savedata will not work, but the plugin(s) themself will be fine.
             }
+
+            return compileSuccess;
         }
 
         /// <summary>

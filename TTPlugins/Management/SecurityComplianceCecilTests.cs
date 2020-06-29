@@ -446,7 +446,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                     }
 
                     // Clear the on-disk output files that were generated during the assembly compile
-                    if (Directory.Exists(compileResult.OutputDirectory))
+                    if (compileResult != null && Directory.Exists(compileResult.OutputDirectory))
                     {
                         DirectoryInfo topDirInfo = new DirectoryInfo(compileResult.OutputDirectory);
                         topDirInfo.Delete(true);

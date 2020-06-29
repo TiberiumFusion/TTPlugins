@@ -14,11 +14,6 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
     public sealed class HPluginApplicatorConfiguration : MarshalByRefObject
     {
         /// <summary>
-        /// List of byte arrays of all assemblies to be loaded into the current AppDomain during HPlugin application.
-        /// </summary>
-        public List<byte[]> AllDependencyAssemblyBytes { get; set; } = new List<byte[]>();
-
-        /// <summary>
         /// The executing Terraria assembly which will be patched using Harmony.
         /// </summary>
         public Assembly ExecutingTerrariaAssembly { get; set; }
