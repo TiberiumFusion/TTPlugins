@@ -152,8 +152,9 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 // If output directory already exists, clear it
                 if (Directory.Exists(outputDir))
                 {
-                    DirectoryInfo outputDirInfo = new DirectoryInfo("outputDir");
-                    outputDirInfo.Delete(true);
+                    DirectoryInfo outputDirInfo = new DirectoryInfo(outputDir);
+                    try { outputDirInfo.Delete(true); }
+                    catch (Exception e) { } // Swallow (for now)
                 }
                 Directory.CreateDirectory(outputDir);
 
