@@ -84,6 +84,9 @@ namespace com.tiberiumfusion.ttplugins.Management
                     // Check at the MSIL level for usage of restricted types
                     foreach (MethodDefinition methodDef in typeDef.Methods)
                     {
+                        if (methodDef == null || methodDef.Body == null || methodDef.Body.Instructions == null)
+                            continue;
+
                         foreach (Instruction ins in methodDef.Body.Instructions)
                         {
                             if (ins.Operand != null)
@@ -148,6 +151,9 @@ namespace com.tiberiumfusion.ttplugins.Management
                     // Check at the MSIL level for usage of restricted types
                     foreach (MethodDefinition methodDef in typeDef.Methods)
                     {
+                        if (methodDef == null || methodDef.Body == null || methodDef.Body.Instructions == null)
+                            continue;
+
                         foreach (Instruction ins in methodDef.Body.Instructions)
                         {
                             if (ins.Operand != null)
