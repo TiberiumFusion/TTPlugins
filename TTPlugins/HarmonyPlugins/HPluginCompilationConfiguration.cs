@@ -58,5 +58,10 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// If true, the generated assembly and its pdb will be deleted from the disk once the compilation has finished.
         /// </summary>
         public bool DeleteOutputFilesFromDiskWhenDone { get; set; } = true;
+
+        /// <summary>
+        /// Command-line arguments provided to CompilerParameters.CompilerOptions during plugin compile. By default, this is "/optimize".
+        /// </summary>
+        public string CompilerArguments { get; set; } = "/optimize";
     }
 }

@@ -111,7 +111,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 CompilerParameters compilerParams = new CompilerParameters();
                 compilerParams.GenerateInMemory = true; // This just affects the compilation process (should be faster than using the disk). The output assembly and its pdb are always written to a file.
                 compilerParams.GenerateExecutable = false;
-                compilerParams.CompilerOptions = "/optimize";
+                compilerParams.CompilerOptions = configuration.CompilerArguments;
                 compilerParams.IncludeDebugInformation = true;
                 compilerParams.TreatWarningsAsErrors = false;
                 // References on disk
