@@ -81,7 +81,6 @@ namespace com.tiberiumfusion.ttplugins.Management
             {
                 foreach (TypeDefinition typeDef in modDef.Types)
                 {
-                    // Check at the MSIL level for usage of restricted types
                     foreach (MethodDefinition methodDef in typeDef.Methods)
                     {
                         if (methodDef == null || methodDef.Body == null || methodDef.Body.Instructions == null)
@@ -101,7 +100,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                     if (violatedNamespace != null)
                                     {
                                         pass = false;
-                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of protected namespace \"" + violatedNamespace + "\" is disallowed."));
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted namespace \"" + violatedNamespace + "\" is disallowed."));
                                     }
                                 }
 
@@ -113,7 +112,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                     if (violatedNamespace != null)
                                     {
                                         pass = false;
-                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of protected namespace \"" + violatedNamespace + "\" is disallowed."));
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted namespace \"" + violatedNamespace + "\" is disallowed."));
                                     }
                                 }
 
@@ -125,7 +124,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                     if (violatedNamespace != null)
                                     {
                                         pass = false;
-                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of protected namespace \"" + violatedNamespace + "\" is disallowed."));
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted namespace \"" + violatedNamespace + "\" is disallowed."));
                                     }
                                 }
                             }
@@ -136,7 +135,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         }
 
         /// <summary>
-        /// Tests an assembly for usage of any restricted type(s).
+        /// Tests an assembly for usage of any fields or methods in restricted type(s).
         /// </summary>
         /// <param name="asmDef">The assembly to test.</param>
         /// <param name="restrictedTypes">A list of restricted types to check for usage of.</param>
@@ -148,7 +147,6 @@ namespace com.tiberiumfusion.ttplugins.Management
             {
                 foreach (TypeDefinition typeDef in modDef.Types)
                 {
-                    // Check at the MSIL level for usage of restricted types
                     foreach (MethodDefinition methodDef in typeDef.Methods)
                     {
                         if (methodDef == null || methodDef.Body == null || methodDef.Body.Instructions == null)
@@ -167,13 +165,13 @@ namespace com.tiberiumfusion.ttplugins.Management
                                     if (restrictedTypes.Contains(asFieldReference.FieldType.FullName))
                                     {
                                         pass = false;
-                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of protected type \"" + asFieldReference.FieldType.FullName + "\" is disallowed."));
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted type \"" + asFieldReference.FieldType.FullName + "\" is disallowed."));
                                     }
                                     // Check for use of a field declared in a restricted type (e.g. ldc.i4.1 -> stsfld <restricted type> to write something like Terraria.Main.netMode = 1; where Terraria.Main is the restricted type, even though the netMode field (Int32) isn't of a restricted type)
                                     if (restrictedTypes.Contains(asFieldReference.DeclaringType.FullName))
                                     {
                                         pass = false;
-                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of protected type \"" + asFieldReference.DeclaringType.FullName + "\" is disallowed."));
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted type \"" + asFieldReference.DeclaringType.FullName + "\" is disallowed."));
                                     }
                                 }
 
@@ -184,7 +182,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                                     if (restrictedTypes.Contains(asMethodReference.DeclaringType.FullName))
                                     {
                                         pass = false;
-                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of protected type \"" + asMethodReference.DeclaringType.FullName + "\" is disallowed."));
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted type \"" + asMethodReference.DeclaringType.FullName + "\" is disallowed."));
                                     }
                                 }
 
@@ -195,7 +193,49 @@ namespace com.tiberiumfusion.ttplugins.Management
                                     if (restrictedTypes.Contains(asTypeReference.FullName))
                                     {
                                         pass = false;
-                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of protected type \"" + asTypeReference.FullName + "\" is disallowed."));
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted type \"" + asTypeReference.FullName + "\" is disallowed."));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tests an assembly for usage of any restricted methods(s).
+        /// </summary>
+        /// <param name="asmDef">The assembly to test.</param>
+        /// <param name="restrictedMethods">A list of restricted methods to check for usage of.</param>
+        /// <param name="pass">Reference to the test's ultimate pass flag.</param>
+        /// <param name="messages">Reference to test's output messages list.</param>
+        private static void TestForRestrictedMethods(AssemblyDefinition asmDef, List<string> restrictedMethods, ref bool pass, List<string> messages)
+        {
+            foreach (ModuleDefinition modDef in asmDef.Modules)
+            {
+                foreach (TypeDefinition typeDef in modDef.Types)
+                {
+                    foreach (MethodDefinition methodDef in typeDef.Methods)
+                    {
+                        if (methodDef == null || methodDef.Body == null || methodDef.Body.Instructions == null)
+                            continue;
+
+                        foreach (Instruction ins in methodDef.Body.Instructions)
+                        {
+                            if ((ins.OpCode == OpCodes.Call || ins.OpCode == OpCodes.Callvirt) && ins.Operand != null)
+                            {
+                                MethodReference asMethodReference = ins.Operand as MethodReference;
+                                if (asMethodReference != null)
+                                {
+                                    // Check for use of a method reference that matches a restricted method name (e.g. call System.Reflection.Assembly::Load(...); where Load() is the restricted method)
+                                    string[] methodSignatureParts = asMethodReference.FullName.Split(' ');
+                                    string justMethodName = methodSignatureParts.Last(); // We're only checking the method name here, not the return type or instance/tail/other prefix attributes
+                                    string justMethodNameWithoutParams = justMethodName.Substring(0, justMethodName.IndexOf('(')); // Strip off the parameters
+                                    if (restrictedMethods.Contains(justMethodNameWithoutParams))
+                                    {
+                                        pass = false;
+                                        messages.Add(CreateInstructionViolationMessage(typeDef, methodDef, ins, "Use of restricted method \"" + justMethodNameWithoutParams + "\" is disallowed."));
                                     }
                                 }
                             }
@@ -254,7 +294,18 @@ namespace com.tiberiumfusion.ttplugins.Management
                 "System.AppDomainSetup",
                 "System.AppDomainManager",
                 "System.AppDomainInitializer",
-                "System.Reflection.Assembly",
+            };
+
+            List<string> restrictedMethods = new List<string>()
+            {
+                "System.Reflection.Assembly::Load",
+                "System.Reflection.Assembly::LoadFile",
+                "System.Reflection.Assembly::LoadFrom",
+                "System.Reflection.Assembly::LoadWithPartialName",
+                "System.Reflection.Assembly::LoadWithPartialName",
+                "System.Reflection.Assembly::ReflectionOnlyLoad",
+                "System.Reflection.Assembly::ReflectionOnlyLoadFrom",
+                "System.Reflection.Assembly::UnsafeLoadFrom",
             };
 
             bool pass = true;
@@ -262,6 +313,7 @@ namespace com.tiberiumfusion.ttplugins.Management
 
             TestForRestrictedNamespaces(asmDef, restrictedNamespaces, null, ref pass, messages);
             TestForRestrictedTypes(asmDef, restrictedTypes, ref pass, messages);
+            TestForRestrictedMethods(asmDef, restrictedMethods, ref pass, messages);
 
             return new SecurityComplianceSingleCecilTestResult(pass, messages);
         }
