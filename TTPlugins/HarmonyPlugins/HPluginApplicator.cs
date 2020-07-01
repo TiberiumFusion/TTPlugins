@@ -58,14 +58,19 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         internal static Assembly EmbeddedHarmonyAssembly { get; private set; }
 
         /// <summary>
-        /// A list of all plugin assemblies that were embedded into Terraria by TTApplicator.
+        /// A list of all plugin assemblies that were loaded into the current AppDomain.
         /// </summary>
-        internal static List<Assembly> EmbeddedPluginAssemblies { get; private set; }
+        internal static List<Assembly> LoadedPluginAssemblies { get; private set; } = new List<Assembly>();
 
         /// <summary>
-        /// A list of the bytes of all plugin assemblies that were embedded into Terraria by TTApplicator.
+        /// A list of the bytes of all plugin assemblies that were extracted in memory.
         /// </summary>
-        internal static List<byte[]> EmbeddedPluginAssemblyBytes { get; private set; }
+        internal static List<byte[]> ExtractedPluginAssemblyBytes { get; private set; } = new List<byte[]>();
+
+        /// <summary>
+        /// A list of the paths of all plugin assemblies that were extracted to the disk.
+        /// </summary>
+        internal static List<string> ExtractedPluginAssemblyPaths { get; private set; } = new List<string>();
 
         #endregion
 
@@ -144,22 +149,86 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     }
                 }
 
-                // Extract and load the plugin assemblies specifiec in the config doc into the appdomain
-                EmbeddedPluginAssemblies = new List<Assembly>();
-                EmbeddedPluginAssemblyBytes = new List<byte[]>();
+                // Get plugin mode config
+                bool pluginDebugMode = bool.Parse(configDocBase.Element("PluginDebugMode")?.Value ?? "false");
+
+                // Extract and load the plugin assemblies specified in the config doc into the appdomain
+                LoadedPluginAssemblies.Clear();
+                ExtractedPluginAssemblyBytes.Clear();
+                ExtractedPluginAssemblyPaths.Clear();
+                string pluginExtractDir = null;
+                if (pluginDebugMode)
+                {
+                    string terrariaFolderPath = Path.GetDirectoryName(TerrariaAssembly.Location);
+                    pluginExtractDir = Path.Combine(terrariaFolderPath, ".TTPlugins_RuntimeExtract");
+                    if (Directory.Exists(pluginExtractDir))
+                    {
+                        try
+                        {
+                            DirectoryInfo dirInfo = new DirectoryInfo(pluginExtractDir);
+                            dirInfo.Delete(true);
+                        }
+                        catch (Exception e) { } // Hopefully the dir was locked and not the files inside
+                    }
+                    Directory.CreateDirectory(pluginExtractDir);
+                }
+
                 XElement PluginAsmResourceNames = configDocBase.Element("PluginAsmResourceNames");
                 foreach (XElement resNameElement in PluginAsmResourceNames.Nodes())
                 {
-                    string resourceName = resNameElement.Value;
-                    using (var resStream = TerrariaAssembly.GetManifestResourceStream(resourceName))
+                    // Find DLL and PDB resource names
+                    string asmResourceName = resNameElement.Value;
+                    string pdbResourceName = null;
+                    if (pluginDebugMode)
                     {
-                        using (var memStream = new MemoryStream())
+                        XAttribute pdbNameAttr = resNameElement.Attribute("PDBName");
+                        if (pdbNameAttr != null)
+                            pdbResourceName = pdbNameAttr.Value;
+                    }
+
+                    // Extract PDB if in debug mode
+                    try
+                    {
+                        if (pluginDebugMode && pdbResourceName != null)
                         {
-                            resStream.CopyTo(memStream);
-                            byte[] asmBytes = memStream.ToArray();
-                            EmbeddedPluginAssemblyBytes.Add(asmBytes);
-                            Assembly pluginAsm = Assembly.Load(asmBytes);
-                            EmbeddedPluginAssemblies.Add(pluginAsm);
+                            using (var resStream = TerrariaAssembly.GetManifestResourceStream(pdbResourceName))
+                            {
+                                string extractPDBPath = Path.Combine(pluginExtractDir, pdbResourceName);
+                                using (FileStream fileStream = File.Open(extractPDBPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete))
+                                {
+                                    resStream.CopyTo(fileStream);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e) { } // Swallow. The pdb may not be available, but the plugin can still be loaded anyways.
+
+                    // Extract the plugin assembly per the debug/release configuration
+                    using (var resStream = TerrariaAssembly.GetManifestResourceStream(asmResourceName))
+                    {
+                        // In debug mode, extract to the disk in order for VS to pick up the PDB when the debugger is attached
+                        if (pluginDebugMode)
+                        {
+                            string extractDLLPath = Path.Combine(pluginExtractDir, asmResourceName);
+                            using (FileStream fileStream = File.Open(extractDLLPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete))
+                            {
+                                resStream.CopyTo(fileStream);
+                            }
+                            ExtractedPluginAssemblyPaths.Add(extractDLLPath);
+                            Assembly pluginAsm = Assembly.LoadFrom(extractDLLPath); // Because this asm will be loaded from the disk, it will be locked by this process and cannot be cleaned up on Terraria shutdown by internal code.
+                            LoadedPluginAssemblies.Add(pluginAsm);
+                        }
+                        // In (normal) release mode, skip the disk and extract in memory
+                        else
+                        {
+                            using (var memStream = new MemoryStream())
+                            {
+                                resStream.CopyTo(memStream);
+                                byte[] asmBytes = memStream.ToArray();
+                                ExtractedPluginAssemblyBytes.Add(asmBytes);
+                                Assembly pluginAsm = Assembly.Load(asmBytes);
+                                LoadedPluginAssemblies.Add(pluginAsm);
+                            }
                         }
                     }
                 }
@@ -180,7 +249,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 // Create the plugin applicator config and hit the go button
                 HPluginApplicatorConfiguration applicatorConfig = new HPluginApplicatorConfiguration();
                 applicatorConfig.ExecutingTerrariaAssembly = TerrariaAssembly;
-                applicatorConfig.AllUsercodeAssemblies = EmbeddedPluginAssemblyBytes;
+                applicatorConfig.PluginAssemblies = LoadedPluginAssemblies;
                 applicatorConfig.PluginTemporaryFilesRootDirectory = pluginTemporaryFilesRootDir;
                 applicatorConfig.PluginTypesRelativePaths = pluginTypeRelPathMap;
                 ApplyPatches(applicatorConfig);
@@ -223,20 +292,11 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 // Map of each relpath to the plugin config that was loaded for it. Allows for reusing of already loaded configs for multiple types that share the same relpath (i.e. several classes in the same plugin assembly).
                 Dictionary<string, XDocument> relpathToLoadedPluginConfig = new Dictionary<string, XDocument>();
 
-                foreach (byte[] usercodeAsmBytes in configuration.AllUsercodeAssemblies)
+                foreach (Assembly pluginAsm in configuration.PluginAssemblies)
                 {
-                    // Try to create the assembly from its bytes
-                    Assembly usercodeAsm;
-                    try { usercodeAsm = Assembly.Load(usercodeAsmBytes); }
-                    catch (Exception e)
-                    {
-                        result.ConfigureAsFailure(HPluginApplicatorResultCodes.UsercodeAssemblyLoadError, e);
-                        return result;
-                    }
-
                     // Find all HPlugins in the usercode assembly
                     const string unknownRelPathString = "Unknown source file path.";
-                    List<Type> foundPluginTypes = usercodeAsm.GetTypes().Where(t => t.IsClass && t.IsSubclassOf(typeof(HPlugin))).ToList();
+                    List<Type> foundPluginTypes = pluginAsm.GetTypes().Where(t => t.IsClass && t.IsSubclassOf(typeof(HPlugin))).ToList();
                     foreach (Type pluginType in foundPluginTypes)
                     {
                         // Create an instance of the plugin

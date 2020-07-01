@@ -19,9 +19,9 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public Assembly ExecutingTerrariaAssembly { get; set; }
 
         /// <summary>
-        /// List of byte arrays of all compiled usercode assemblies that contain the HPlugins to be applied.
+        /// List of all loaded usercode assemblies that contain the HPlugins to be applied.
         /// </summary>
-        public List<byte[]> AllUsercodeAssemblies { get; set; } = new List<byte[]>();
+        public List<Assembly> PluginAssemblies { get; set; } = new List<Assembly>();
 
         /// <summary>
         /// Dictionary that maps the full name of each HPlugin type to the relative path of its source file (which is its configuration and savedata identity).
