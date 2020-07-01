@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using HarmonyLib;
 
 namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
@@ -111,7 +112,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             // At this point, the MSIL patch has loaded TTPlugins from the embedded resources in order to call this static method.
             // We now need to load the rest of what TTApplicator has embedded before calling ApplyPatches
 
-            System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Launch();
 
             try
             {
@@ -215,7 +216,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                 resStream.CopyTo(fileStream);
                             }
                             ExtractedPluginAssemblyPaths.Add(extractDLLPath);
-                            Assembly pluginAsm = Assembly.LoadFrom(extractDLLPath); // Because this asm will be loaded from the disk, it will be locked by this process and cannot be cleaned up on Terraria shutdown by internal code.
+                            Assembly pluginAsm = Assembly.LoadFile(extractDLLPath); // Because this asm will be loaded from the disk, it will be locked by this process and cannot be cleaned up on Terraria shutdown by internal code.
                             LoadedPluginAssemblies.Add(pluginAsm);
                         }
                         // In (normal) release mode, skip the disk and extract in memory
@@ -276,13 +277,18 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             // Create a harmony instance
             try
             {
-                HarmonyInstance = new HarmonyLib.Harmony("com.tiberiumfusion.ttplugins.HarmonyPlugins.HPluginApplicator");
+                HarmonyInstance = new Harmony("com.tiberiumfusion.ttplugins.HarmonyPlugins.HPluginApplicator");
             }
             catch (Exception e)
             {
                 result.ConfigureAsFailure(HPluginApplicatorResultCodes.CreateHarmonyInstanceFailure, e);
                 return result;
             }
+
+
+            // Apply framework patches before applying usercode patches
+            Type fwPatches = typeof(HFrameworkPatches);
+            HarmonyInstance.Patch(GetTerrariaMethod("Terraria.Main", "SaveSettings"), new HarmonyMethod(fwPatches.GetMethod("FW_SaveAllPluginConfigs")));
 
 
             // Find all HPlugins in the compiled assemblies and apply them
@@ -361,13 +367,15 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         supervisedPlugin.LatestConfigurationXML = pluginConfigurationDoc;
 
                         // Setup the Configuration object from the xml doc
-                        HPluginConfiguration pluginConfiguration = new HPluginConfiguration(); // Create a new configuration with empty default values
+                        HPluginConfiguration pluginConfiguration = new HPluginConfiguration(); // Create a new configuration object for the xml config
                         try
                         {
-                            XElement savedataElement = pluginConfigurationDoc.Element("Savedata");
-                            if (savedataElement != null)
+                            XElement baseElement = pluginConfigurationDoc.Element("PluginConfig");
+                            if (baseElement != null)
                             {
-                                pluginConfiguration.Savedata = savedataElement;
+                                XElement savedataElement = baseElement.Element("Savedata");
+                                if (savedataElement != null)
+                                    pluginConfiguration.Savedata = savedataElement;
                             }
                         }
                         catch (Exception e)
@@ -434,9 +442,9 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             try
                             {
                                 if (patchOp.PatchLocation == HPatchLocation.Prefix)
-                                    HarmonyInstance.Patch(patchOp.TargetMethod, new HarmonyLib.HarmonyMethod(patchOp.StubMethod));
+                                    HarmonyInstance.Patch(patchOp.TargetMethod, new HarmonyMethod(patchOp.StubMethod));
                                 else if (patchOp.PatchLocation == HPatchLocation.Postfix)
-                                    HarmonyInstance.Patch(patchOp.TargetMethod, null, new HarmonyLib.HarmonyMethod(patchOp.StubMethod));
+                                    HarmonyInstance.Patch(patchOp.TargetMethod, null, new HarmonyMethod(patchOp.StubMethod));
 
                                 AppliedHPlugins.Add(supervisedPlugin);
                             }
@@ -463,6 +471,39 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
 
         #region Helpers
+
+        /// <summary>
+        /// Finds and returns a MethodInfo for a method in the executing Terraria assembly.
+        /// </summary>
+        /// <param name="typeFullName">The full name of the type to look in for the provided method.</param>
+        /// <param name="methodName">The name of the method to look for.</param>
+        /// <param name="parameterCount">The number of parameters that the target method has.</param>
+        /// <param name="firstParamType">The type of the first parameter that the target method has.</param>
+        /// <returns>The found MethodInfo, or null if nothing was found.</returns>
+        private static MethodInfo GetTerrariaMethod(string typeFullName, string methodName, int parameterCount = -1, Type firstParamType = null)
+        {
+            if (TerrariaAssembly == null)
+                return null;
+
+            Type foundType = TerrariaAssembly.GetTypes().Where(t => t.FullName == typeFullName).FirstOrDefault();
+            if (foundType == null)
+                return null;
+
+            List<MethodInfo> foundMethods = foundType.GetRuntimeMethods().Where(
+                m => m.Name == methodName
+                && (parameterCount == -1 || m.GetParameters().Length == parameterCount)
+                && (firstParamType == null || (m.GetParameters().Length > 0 && m.GetParameters()[0].ParameterType == firstParamType))
+            ).ToList();
+            if (foundMethods.Count == 0)
+                return null;
+            else
+                return foundMethods[0];
+        }
+
+        #endregion
+
+
+        #region Plugin Persistent Savedata Handling
 
         /// <summary>
         /// Creates a new, blank XDocument that contains the necessary XML structure for a plugin's configuration.xml file.
@@ -500,34 +541,63 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
 
         /// <summary>
-        /// Asynchronously writes the specified HPlugin's Configuration property to disk. Is typically called by HPlugins when their usercode logic wants to save their Configuration's current Savedata.
+        /// Synchronously writes all HPlugins' Configuration to its temporary on-disk copy. Typically called by a Harmony patch that hooks in to Terraria.Main.SaveSettings().
         /// </summary>
-        /// <param name="plugin"></param>
-        internal static void WriteConfigurationForHPlugin(HPlugin plugin)
+        public static void WriteAllPluginConfigToDisk()
         {
-            Task.Run(() =>
+            try
             {
-                try
+                foreach (var supervisedPlugin in HPluginToSupervised.Values)
                 {
-                    HSupervisedPlugin supervisedPlugin = HPluginToSupervised[plugin];
-                    if (supervisedPlugin != null)
+                    try
                     {
-                        string savedataFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, LastConfiguation);
-                        if (savedataFilePath != null)
+                        string configFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, LastConfiguation);
+                        if (configFilePath != null)
                         {
-                            // Remove old savedata
-                            XElement oldSavedata = supervisedPlugin.LatestConfigurationXML.Element("Savedata");
-                            if (oldSavedata != null)
-                                oldSavedata.Remove();
+                            XElement baseElement = supervisedPlugin.LatestConfigurationXML.Element("PluginConfig");
+                            if (baseElement != null)
+                            {
+                                // Remove old savedata
+                                XElement oldSavedata = baseElement.Element("Savedata");
+                                if (oldSavedata != null)
+                                    oldSavedata.Remove();
 
-                            // Add new savedata and write to disk
-                            supervisedPlugin.LatestConfigurationXML.Add(supervisedPlugin.Plugin.Configuration.Savedata);
-                            supervisedPlugin.LatestConfigurationXML.Save(savedataFilePath);
+                                // Add new savedata and write to disk
+                                baseElement.Add(supervisedPlugin.Plugin.Configuration.Savedata);
+                                supervisedPlugin.LatestConfigurationXML.Save(configFilePath);
+                            }
                         }
                     }
+                    catch (Exception e) { }
                 }
-                catch (Exception e) { } // Swallow it for now
-            });
+            }
+            catch (Exception e) { }
+        }
+
+        /// <summary>
+        /// Synchronously deletes all plugin configuration temporary disk copies.
+        /// </summary>
+        public static void DeleteAllPluginConfigDiskCopies()
+        {
+            try
+            {
+                foreach (var supervisedPlugin in HPluginToSupervised.Values)
+                {
+                    try
+                    {
+                        string configFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, LastConfiguation);
+                        if (configFilePath != null)
+                        {
+                            if (File.Exists(configFilePath))
+                            {
+                                File.Delete(configFilePath);
+                            }
+                        }
+                    }
+                    catch (Exception e) { }
+                }
+            }
+            catch (Exception e) { }
         }
 
         #endregion

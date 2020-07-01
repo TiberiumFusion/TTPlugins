@@ -16,7 +16,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// An XML element which may contain user preferences or other persistent plugin savedata.
         /// This object will automatically be saved to disk when Terraria closes.
         /// Make changes to this object to update your plugin's savedata.
-        /// This will be an empty element if your plugin claims it does not need persistent savedata (HPlugin.HasPersistentData = false).
+        /// This will be an empty element with blank defaults if your plugin claims it does not need persistent savedata (HPlugin.HasPersistentData = false).
         /// </summary>
         public XElement Savedata { get; set; }
 

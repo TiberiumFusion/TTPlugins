@@ -66,14 +66,6 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             Configuration = config;
         }
 
-        /// <summary>
-        /// Writes the current Configuration object and associated savedata to disk in an asynchronous task.
-        /// </summary>
-        protected void SaveConfigurationToDisk()
-        {
-            HPluginApplicator.WriteConfigurationForHPlugin(this);
-        }
-
         #endregion
 
 
