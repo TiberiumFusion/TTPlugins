@@ -27,6 +27,11 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Error message (if applicable). Used for non-exception errors.
         /// </summary>
         public string ErrorMessage = null;
+        
+        /// <summary>
+        /// List of HPlugins (by their full type name) that failed to construct in the Activator.
+        /// </summary>
+        public List<string> HPluginsThatFailedConstruction = new List<string>();
 
         /// <summary>
         /// List of HPlugins (by their relative source file path) that threw exceptions during their Initialize() (and thus don't have a valid Identity to use).

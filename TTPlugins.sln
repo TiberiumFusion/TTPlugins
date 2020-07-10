@@ -5,6 +5,19 @@ VisualStudioVersion = 15.0.28307.1145
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TTPlugins", "TTPlugins\TTPlugins.csproj", "{A01762B1-4E94-44E0-B4D6-E81949CC09D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrecompiledPluginDemo", "ExamplePlugins\Simple\PrecompiledPluginDemo\PrecompiledPluginDemo.csproj", "{76A9C6DA-5D66-425E-84F4-27C7D769793A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExamplePlugins", "ExamplePlugins", "{D0FE83F7-7451-4874-887A-F9F3A7E5F66A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Simple", "Simple", "{952D9296-D7D2-4438-8710-0196304D5E6D}"
+	ProjectSection(SolutionItems) = preProject
+		ExamplePlugins\Simple\SinglePatchDemo.cs = ExamplePlugins\Simple\SinglePatchDemo.cs
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompleteWeaponDemo", "ExamplePlugins\Advanced\CompleteWeaponDemo\CompleteWeaponDemo.csproj", "{2440C5D0-4D27-4B07-B9B6-6140AB9C27D0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Advanced", "Advanced", "{29D399A3-147C-4179-9D1E-0C7AD3E737DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +28,23 @@ Global
 		{A01762B1-4E94-44E0-B4D6-E81949CC09D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A01762B1-4E94-44E0-B4D6-E81949CC09D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A01762B1-4E94-44E0-B4D6-E81949CC09D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76A9C6DA-5D66-425E-84F4-27C7D769793A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76A9C6DA-5D66-425E-84F4-27C7D769793A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76A9C6DA-5D66-425E-84F4-27C7D769793A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76A9C6DA-5D66-425E-84F4-27C7D769793A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2440C5D0-4D27-4B07-B9B6-6140AB9C27D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2440C5D0-4D27-4B07-B9B6-6140AB9C27D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2440C5D0-4D27-4B07-B9B6-6140AB9C27D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2440C5D0-4D27-4B07-B9B6-6140AB9C27D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{76A9C6DA-5D66-425E-84F4-27C7D769793A} = {952D9296-D7D2-4438-8710-0196304D5E6D}
+		{952D9296-D7D2-4438-8710-0196304D5E6D} = {D0FE83F7-7451-4874-887A-F9F3A7E5F66A}
+		{2440C5D0-4D27-4B07-B9B6-6140AB9C27D0} = {29D399A3-147C-4179-9D1E-0C7AD3E737DE}
+		{29D399A3-147C-4179-9D1E-0C7AD3E737DE} = {D0FE83F7-7451-4874-887A-F9F3A7E5F66A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC144877-29BD-4DD0-925E-685AA9A5FD3F}

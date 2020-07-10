@@ -73,6 +73,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="asmDef">The assembly to test.</param>
         /// <param name="restrictedNamespaces">A list of restricted namespaces to check for usage of.</param>
+        /// <param name="whitelistedNamespaces">A list of namespaces to exempt from the restricted list.</param>
         /// <param name="pass">Reference to the test's ultimate pass flag.</param>
         /// <param name="messages">Reference to test's output messages list.</param>
         private static void TestForRestrictedNamespaces(AssemblyDefinition asmDef, List<string> restrictedNamespaces, List<string> whitelistedNamespaces, ref bool pass, List<string> messages)

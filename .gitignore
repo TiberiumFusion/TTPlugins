@@ -259,3 +259,12 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+
+# Reference assemblies (get them from your own install)
+ExternalReferences/
+/ExamplePlugins/References/
+
+# Asset source files
+ExamplePlugins/Advanced/CompleteWeaponDemo/Assets/*.psd
+ExamplePlugins/Advanced/CompleteWeaponDemo/Assets/Sourcing/
