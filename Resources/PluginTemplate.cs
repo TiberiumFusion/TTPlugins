@@ -10,13 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using com.tiberiumfusion.ttplugins.HarmonyPlugins;
 
-namespace {{TEMPLATE_NAMESPACE}}
+namespace TEMPLATE_NAMESPACE
 {
 	/// <summary>
     /// This is the main class of your plugin.
     /// Don't forget to use the TTPlugins reference wiki: https://github.com/TiberiumFusion/TTPlugins/wiki
     /// </summary>
-    public class {{TEMPLATE_CLASSNAME}} : HPlugin
+    public class TEMPLATE_CLASSNAME : HPlugin
     {
         #region Plugin Self-Management
 
@@ -28,10 +28,10 @@ namespace {{TEMPLATE_NAMESPACE}}
         public override void Initialize()
 		{
 			// Establish this plugin's internal Identity within the TTPlugins environment. Every plugin should have a unique internal Identity.
-			Identity.PluginName = "{{TEMPLATE_PLUGINIDNAME}}";
-			Identity.PluginDescription = "{{TEMPLATE_PLUGINIDDESC}}";
-			Identity.PluginAuthor = "{{TEMPLATE_PLUGINIDAUTHOR}}";
-			Identity.PluginVersion = new Version("{{TEMPLATE_PLUGINIDVERSION}}");
+			Identity.PluginName = "TEMPLATE_PLUGINIDNAME";
+			Identity.PluginDescription = "TEMPLATE_PLUGINIDDESC";
+			Identity.PluginAuthor = "TEMPLATE_PLUGINIDAUTHOR";
+			Identity.PluginVersion = new Version("TEMPLATE_PLUGINIDVERSION");
 			
 			HasPersistentSavedata = false; // Set to true if your plugin uses the persistent savedata system.
 
