@@ -268,3 +268,6 @@ ExternalReferences/
 # Asset source files
 ExamplePlugins/Advanced/CompleteWeaponDemo/Assets/*.psd
 ExamplePlugins/Advanced/CompleteWeaponDemo/Assets/Sourcing/
+
+# Docs
+Sandcastle/

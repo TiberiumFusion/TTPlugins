@@ -94,6 +94,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Postfixed onto Terraria.Chat.ChatCommandProcessor.CreateOutgoingMessage().
         /// Shows the plugin report if the player types /ttplugins in chat.
         /// </summary>
+        /// <param name="text">Parameter from original method.</param>
         public static void FW_ShowPluginReport(string text)
         {
             DLog("Entered FW_ShowPluginReport()");

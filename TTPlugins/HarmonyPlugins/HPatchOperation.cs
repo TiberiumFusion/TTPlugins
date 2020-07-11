@@ -36,7 +36,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <summary>
         /// Creates a new patch operation using the supplied target method, stub method, and patch location.
         /// </summary>
-        /// <param name="targetMethod">The target method/constructor that will be patched.</param>
+        /// <param name="targetMethod">The target method or constructor that will be patched.</param>
         /// <param name="stubMethod">The stub method that will be either prepended or appended to the target method. Must be a static method!</param>
         /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
@@ -49,7 +49,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
 
         /// <summary>
-        /// Creates a new patch operation using the supplied target type & method name, stub method, and patch location.
+        /// Creates a new patch operation using the supplied target type &amp; method name, stub method, and patch location.
         /// </summary>
         /// <param name="targetType">The target type that contains the target method.</param>
         /// <param name="targetMethodName">The name of the target method.</param>
