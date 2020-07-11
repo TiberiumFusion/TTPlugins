@@ -13,6 +13,28 @@ Generally speaking, a plugin is any module of external code that runs on a frame
 ### Dynamic patching
 TTPlugins uses the fantastic [Harmony](https://github.com/pardeike/Harmony/wiki) library to patch Terraria at runtime. Harmony modifies the execution flow of .NET applications in memory and does not touch any on-disk files.
 
+### How easy is it?
+Here's a quick example of a super basic but fully functional plugin that gives the player superspeed. This is the entire plugin source code. Optional plugin features, like Identity and persistent savedata, are not present in this example.
+```C#
+using System;
+using com.tiberiumfusion.ttplugins.HarmonyPlugins;
+namespace MyPlugin
+{
+    public class SuperSpeed : HPlugin
+    {
+        public override void PrePatch()
+        {
+            CreateHPatchOperation("Terraria.Player", "UpdateEquips", "SuperSpeedPatch", HPatchLocation.Prefix);
+        }
+		
+	public static void SuperSpeedPatch(Terraria.Player __instance)
+        {
+            __instance.moveSpeed += 20.0f;
+        }
+    }
+}
+```
+
 ## For plugin authors
 If you are interesting in writing your own plugins, please visit the [Wiki](https://github.com/TiberiumFusion/TTPlugins/wiki) for tutorials, videos, and reference material.
 
