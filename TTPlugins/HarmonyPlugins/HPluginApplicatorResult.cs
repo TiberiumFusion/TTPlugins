@@ -9,7 +9,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
     /// <summary>
     /// A data bundle of returned information from the HPluginApplicator
     /// </summary>
-    public class HPluginApplicatorResult : MarshalByRefObject
+    public class HPluginApplicatorResult
     {
         #region Properties
 
@@ -44,9 +44,14 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public Dictionary<string, Exception> HPluginsWithFailedConfigurationLoads = new Dictionary<string, Exception>();
 
         /// <summary>
-        /// List of HPlugins (by their relative source file path) that threw exceptions while executing their override methods.
+        /// List of HPlugins (by their relative source file path) that threw exceptions in their ConfigurationLoaded().
         /// </summary>
-        public Dictionary<string, Exception> HPluginsThatThrewExceptions = new Dictionary<string, Exception>();
+        public Dictionary<string, Exception> HPluginsThatFailedConfigurationLoaded = new Dictionary<string, Exception>();
+
+        /// <summary>
+        /// List of HPlugins (by their relative source file path) that threw exceptions in their PrePatch().
+        /// </summary>
+        public Dictionary<string, Exception> HPluginsThatFailedPrePatch = new Dictionary<string, Exception>();
 
         /// <summary>
         /// List of HPlugins (by their relative source file path) that tried to do things they shouldn't do.
@@ -56,7 +61,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <summary>
         /// List of HPlugins (by their relative source file path) that tried to patch null MethodInfos.
         /// </summary>
-        public List<string> HPluginsWithNullMethodInfos = new List<string>();
+        public List<string> HPluginsThatTriedToPatchNullMethodInfos = new List<string>();
 
         /// <summary>
         /// List of HPlugins (by their relative source file path) that threw exceptions while Harmony.Patch was trying to patch them.

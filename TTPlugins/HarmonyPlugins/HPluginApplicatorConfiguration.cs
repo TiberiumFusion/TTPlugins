@@ -11,7 +11,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
     /// Provides configuration data for the HPluginApplicator.
     /// Configuration data will be provided by TTApplicator.
     /// </summary>
-    public sealed class HPluginApplicatorConfiguration : MarshalByRefObject
+    public sealed class HPluginApplicatorConfiguration
     {
         /// <summary>
         /// The executing Terraria assembly which will be patched using Harmony.

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using com.tiberiumfusion.ttplugins.Forms;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
@@ -86,6 +88,34 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public static void FW_InterceptTimeLoggerDrawException(Exception e)
         {
             Debug.WriteLine("Exception intercepted from Terraria.TimeLogger.DrawException(): " + e);
+        }
+
+        /// <summary>
+        /// Postfixed onto Terraria.Chat.ChatCommandProcessor.CreateOutgoingMessage().
+        /// Shows the plugin report if the player types /ttplugins in chat.
+        /// </summary>
+        public static void FW_ShowPluginReport(string text)
+        {
+            DLog("Entered FW_ShowPluginReport()");
+
+            if (text == "/ttplugins")
+            {
+                try
+                {
+                    Form terrariaForm = (Form)Form.FromHandle(Terraria.Main.instance.Window.Handle);
+                    
+                    if (HPluginApplicator.LastResult != null)
+                    {
+                        PluginReport reportForm = new PluginReport();
+                        reportForm.CreateReport(HPluginApplicator.LastResult);
+                        reportForm.Show(terrariaForm);
+                    }
+                }
+                catch (Exception e)
+                {
+                    DLog("Generic error while showing plugins report form. Details: " + e);
+                }
+            }
         }
     }
 }

@@ -53,7 +53,12 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <summary>
         /// The HPluginApplicatorConfiguration used in the last ApplyPatches() call.
         /// </summary>
-        private static HPluginApplicatorConfiguration LastConfiguation;
+        internal static HPluginApplicatorConfiguration LastConfiguation { get; private set; }
+
+        /// <summary>
+        /// The result report from the last time ApplyPatches() was invoked. 
+        /// </summary>
+        internal static HPluginApplicatorResult LastResult { get; private set; }
 
         /// <summary>
         /// List of namespaces which HPlugins are not allowed to patch.
@@ -363,6 +368,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
             LastConfiguation = configuration;
             HPluginApplicatorResult result = new HPluginApplicatorResult();
+            LastResult = result;
 
 
             // Fix weird missing assembly issues
@@ -401,7 +407,11 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             DLog("Applying FW_InterceptTimeLoggerDrawException...", 1);
             HarmonyInstance.Patch(GetTerrariaMethod("Terraria.TimeLogger", "DrawException"), new HarmonyMethod(fwPatches.GetMethod("FW_InterceptTimeLoggerDrawException")));
             DLog("done", false);
-            
+
+            DLog("Applying FW_ShowPluginReport...", 1);
+            HarmonyInstance.Patch(GetTerrariaMethod("Terraria.Chat.ChatCommandProcessor", "CreateOutgoingMessage"), null, new HarmonyMethod(fwPatches.GetMethod("FW_ShowPluginReport")));
+            DLog("done", false);
+
             DLog("Framework patches done");
 
 
@@ -574,7 +584,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         catch (Exception e)
                         {
                             DLog("Plugin of type \"" + pluginType.FullName + "\" from source \"" + supervisedPlugin.SourceFileRelativePath + "\" threw an error during ConfigurationLoaded(). Details: " + e, 4);
-                            result.HPluginsThatThrewExceptions[supervisedPlugin.SourceFileRelativePath] = e;
+                            result.HPluginsThatFailedConfigurationLoaded[supervisedPlugin.SourceFileRelativePath] = e;
                             if (PluginDebugMode) throw e;
                             continue; // Skip over this plugin
                         }
@@ -590,7 +600,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         catch (Exception e)
                         {
                             DLog("Plugin of type \"" + pluginType.FullName + "\" from source \"" + supervisedPlugin.SourceFileRelativePath + "\" threw an error during PrePatch(). Details: " + e, 4);
-                            result.HPluginsThatThrewExceptions[supervisedPlugin.SourceFileRelativePath] = e;
+                            result.HPluginsThatFailedPrePatch[supervisedPlugin.SourceFileRelativePath] = e;
                             if (PluginDebugMode) throw e;
                             continue; // Skip over this plugin
                         }
@@ -619,7 +629,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             // Ensure both the target and patch stub MethodInfos exist
                             if (patchOp.TargetMethod == null || patchOp.StubMethod == null)
                             {
-                                result.HPluginsWithNullMethodInfos.Add(supervisedPlugin.SourceFileRelativePath);
+                                result.HPluginsThatTriedToPatchNullMethodInfos.Add(supervisedPlugin.SourceFileRelativePath);
                                 continue; // Skip over this plugin
                             }
 
@@ -649,7 +659,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                 else if (patchOp.PatchLocation == HPatchLocation.Postfix)
                                     HarmonyInstance.Patch(patchOp.TargetMethod, null, new HarmonyMethod(patchOp.StubMethod, patchOp.PatchPriority));
 
-                                AppliedHPlugins.Add(supervisedPlugin);
+                                if (!AppliedHPlugins.Contains(supervisedPlugin))
+                                    AppliedHPlugins.Add(supervisedPlugin);
                                 DLog("done", false);
                             }
                             catch (Exception e)
@@ -872,20 +883,23 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 {
                     try
                     {
-                        string configFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, LastConfiguation);
-                        if (configFilePath != null)
+                        if (supervisedPlugin.Plugin.HasPersistentSavedata)
                         {
-                            XElement baseElement = supervisedPlugin.LatestConfigurationXML.Element("PluginConfig");
-                            if (baseElement != null)
+                            string configFilePath = GetConfigurationXMLFilePathForPlugin(supervisedPlugin, LastConfiguation);
+                            if (configFilePath != null)
                             {
-                                // Remove old savedata
-                                XElement oldSavedata = baseElement.Element("Savedata");
-                                if (oldSavedata != null)
-                                    oldSavedata.Remove();
+                                XElement baseElement = supervisedPlugin.LatestConfigurationXML.Element("PluginConfig");
+                                if (baseElement != null)
+                                {
+                                    // Remove old savedata
+                                    XElement oldSavedata = baseElement.Element("Savedata");
+                                    if (oldSavedata != null)
+                                        oldSavedata.Remove();
 
-                                // Add new savedata and write to disk
-                                baseElement.Add(supervisedPlugin.Plugin.Configuration.Savedata);
-                                supervisedPlugin.LatestConfigurationXML.Save(configFilePath);
+                                    // Add new savedata and write to disk
+                                    baseElement.Add(supervisedPlugin.Plugin.Configuration.Savedata);
+                                    supervisedPlugin.LatestConfigurationXML.Save(configFilePath);
+                                }
                             }
                         }
                     }

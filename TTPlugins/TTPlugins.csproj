@@ -73,6 +73,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -89,6 +90,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="Forms\PluginReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PluginReport.Designer.cs">
+      <DependentUpon>PluginReport.cs</DependentUpon>
+    </Compile>
     <Compile Include="HarmonyPlugins\HFrameworkPatches.cs" />
     <Compile Include="HarmonyPlugins\HHelpers.cs" />
     <Compile Include="HarmonyPlugins\HPatchLocation.cs" />
@@ -115,6 +122,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ExternalReferences\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Forms\PluginReport.resx">
+      <DependentUpon>PluginReport.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

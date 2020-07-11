@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
     /// <summary>
-    /// Container of both an HPlugin and data related to the HPlugin that is hidden from the HPlugin itself
+    /// Container of both an HPlugin and data related to the HPlugin that is hidden from the HPlugin itself.
     /// </summary>
     internal class HSupervisedPlugin
     {
