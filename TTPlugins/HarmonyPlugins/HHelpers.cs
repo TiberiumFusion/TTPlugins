@@ -130,7 +130,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
         /// <summary>
         /// Creates an instance of the specified using the first found constructor.
-        /// This method only operates on types that are defined inside the Terraria, ReLogic, or XNA assemblies. If the type is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on types that are defined inside the Terraria, ReLogic, or XNA assemblies. If the type is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="type">The type to activate an instance of.</param>
         /// <param name="ctorParams">An object[] of parameters to pass to the constructor. Set to null for no parameters.</param>
@@ -149,7 +149,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
         /// <summary>
         /// Retrieves the value of a field using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="fieldName">The name of the field which will be read. The sourceObject's type will be used to find the field.</param>
         /// <param name="sourceObject">The object that contains the field to be read.</param>
@@ -161,7 +161,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Retrieves the value of a field using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="type">The Type that contains the specified field to read.</param>
         /// <param name="fieldName">The name of the field which will be read.</param>
@@ -177,7 +177,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Retrieves the value of a field using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="field">The FieldInfo associated with the field to be read.</param>
         /// <param name="sourceObject">The object that contains the field to be read.</param>
@@ -194,7 +194,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
         /// <summary>
         /// Writes the value of a field using Reflection. This method may incur considerable performance penalties. 
-        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="fieldName">The name of the field which will be written to. The sourceObject's type will be used to find the field.</param>
         /// <param name="sourceObject">The object that contains the field to write to.</param>
@@ -206,7 +206,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Writes the value of a field using Reflection. This method may incur considerable performance penalties. 
-        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="type">The Type that contains the specified field to write to.</param>
         /// <param name="fieldName">The name of the field which will be written to.</param>
@@ -222,7 +222,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Writes the value of a field using Reflection. This method may incur considerable performance penalties. 
-        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on fields that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the field is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="field">The FieldInfo associated with the field to write to.</param>
         /// <param name="sourceObject">The object that contains the field to write to.</param>
@@ -239,7 +239,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         
         /// <summary>
         /// Gets the value of a property using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="propertyName">The name of the property which will be read. The sourceObject's type will be used to find the property.</param>
         /// <param name="sourceObject">The object that contains the property to be read.</param>
@@ -251,7 +251,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Gets the value of a property using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="type">The Type that contains the specified property to read.</param>
         /// <param name="propertyName">The name of the property which will be read. The sourceObject's type will be used to find the property.</param>
@@ -267,7 +267,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Gets the value of a property using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="property">The PropertyInfo associated with the property to be read.</param>
         /// <param name="sourceObject">The object that contains the property to be read.</param>
@@ -283,7 +283,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         
         /// <summary>
         /// Sets the value of a property using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="propertyName">The name of the property which will be written to. The sourceObject's type will be used to find the property.</param>
         /// <param name="sourceObject">The object that contains the property to write to.</param>
@@ -295,7 +295,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Sets the value of a property using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="type">The Type that contains the specified property to set.</param>
         /// <param name="propertyName">The name of the property which will be set.</param>
@@ -311,7 +311,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
         /// <summary>
         /// Sets the value of a property using Reflection. This method may incur considerable performance penalties.
-        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria or ReLogic assembly, an exception is thrown.
+        /// This method only operates on properties that are defined by types inside the Terraria, ReLogic, or XNA assemblies. If the type that owns the property is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="property">The PropertyInfo associated with the property to set.</param>
         /// <param name="sourceObject">The object that contains the property to set.</param>
