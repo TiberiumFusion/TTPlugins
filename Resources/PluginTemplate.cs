@@ -12,7 +12,7 @@ using com.tiberiumfusion.ttplugins.HarmonyPlugins;
 
 namespace TEMPLATE_NAMESPACE
 {
-	/// <summary>
+    /// <summary>
     /// This is the main class of your plugin.
     /// Don't forget to use the TTPlugins reference wiki: https://github.com/TiberiumFusion/TTPlugins/wiki
     /// </summary>
@@ -26,18 +26,18 @@ namespace TEMPLATE_NAMESPACE
         /// 2. Set HasPersistentData to true or false, depending on your plugin's needs.
         /// </summary>
         public override void Initialize()
-		{
-			// Establish this plugin's internal Identity within the TTPlugins environment. Every plugin should have a unique internal Identity.
-			Identity.PluginName = "TEMPLATE_PLUGINIDNAME";
-			Identity.PluginDescription = "TEMPLATE_PLUGINIDDESC";
-			Identity.PluginAuthor = "TEMPLATE_PLUGINIDAUTHOR";
-			Identity.PluginVersion = new Version("TEMPLATE_PLUGINIDVERSION");
-			
-			HasPersistentSavedata = false; // Set to true if your plugin uses the persistent savedata system.
+        {
+            // Establish this plugin's internal Identity within the TTPlugins environment. Every plugin should have a unique internal Identity.
+            Identity.PluginName = "TEMPLATE_PLUGINIDNAME";
+            Identity.PluginDescription = "TEMPLATE_PLUGINIDDESC";
+            Identity.PluginAuthor = "TEMPLATE_PLUGINIDAUTHOR";
+            Identity.PluginVersion = new Version("TEMPLATE_PLUGINIDVERSION");
+
+            HasPersistentSavedata = false; // Set to true if your plugin uses the persistent savedata system.
 
 
             // TODO: Setup the rest of your plugin here (if necessary)
-		}
+        }
 
         /// <summary>
         /// This is called ONCE by the HPlugin applicator some time after Initialize() and after the plugin's on-disk savedata has been loaded (if applicable).
@@ -46,18 +46,18 @@ namespace TEMPLATE_NAMESPACE
         /// </summary>
         /// <param name="successfulConfigLoadFromDisk">True if the configuration was successfully loaded from the disk (or if there was no prior configuration and a new one was generated). False if the configuration failed to load and a blank configuration was substituted in.</param>
         public override void ConfigurationLoaded(bool successfulConfigLoadFromDisk)
-		{
-		    // TODO: Load persistent savedata (if applicable)
-		}
+        {
+            // TODO: Load persistent savedata (if applicable)
+        }
 
         /// <summary>
         /// This is called ONCE by the HPlugin applicator (some time after ConfigurationLoaded()) immediately before the plugin's PatchOperations are executed.
         /// If your plugin has not defined its PatchOperations by this point, it must do so now, or nothing will be patched.
         /// </summary>
         public override void PrePatch()
-		{
-		    // TODO: Define patch operations for your plugin using the various CreateHPatchOperation() methods.
-		}
+        {
+            // TODO: Define patch operations for your plugin using the various CreateHPatchOperation() methods.
+        }
 
         #endregion
 
