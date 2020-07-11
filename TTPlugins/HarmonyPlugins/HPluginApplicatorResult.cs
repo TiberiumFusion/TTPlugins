@@ -95,13 +95,28 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
     }
 
     /// <summary>
-    /// All result codes.
+    /// All possible result codes from plugin application.
     /// </summary>
     public enum HPluginApplicatorResultCodes
     {
+        /// <summary>
+        /// No outstanding errors occurred.
+        /// </summary>
         Success = 0,
+
+        /// <summary>
+        /// An unexpected error occurred.
+        /// </summary>
         GenericFailure = 1000,
+
+        /// <summary>
+        /// Could not instantiate Harmony.
+        /// </summary>
         CreateHarmonyInstanceFailure = 1001,
+
+        /// <summary>
+        /// An unexpected error occurred, specifically during plugin application (i.e. after preparation).
+        /// </summary>
         GenericHPluginApplicationFailure = 2000,
     }
 }

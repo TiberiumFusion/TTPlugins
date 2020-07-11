@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
+    /// <summary>
+    /// The location at which to apply a stub patch method.
+    /// </summary>
     public enum HPatchLocation
     {
         /// <summary>
