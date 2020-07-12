@@ -153,7 +153,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         }
 
         /// <summary>
-        /// Creates an instance of the specified using the first found constructor.
+        /// Creates an instance of the specified type using the first found constructor.
         /// This method only operates on types that are defined inside the Terraria, ReLogic, or XNA assemblies. If the type is not defined in the Terraria, ReLogic, or XNA assemblies, an exception is thrown.
         /// </summary>
         /// <param name="type">The type to activate an instance of.</param>
@@ -208,11 +208,20 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <returns>The sourceObject's value of the field.</returns>
         public static object GetFieldValueWithReflection(FieldInfo field, object sourceObject)
         {
-            Type sourceObjectType = sourceObject.GetType();
-            if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
-                throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+            if (field.IsStatic)
+            {
+                if (!VerifyTypeForSecureReflectionUse(field.DeclaringType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The declaring type of static field " + field.DeclaringType.FullName + "." + field.Name + " is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+                return field.GetValue(null);
+            }
+            else
+            {
+                Type sourceObjectType = sourceObject.GetType();
+                if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
 
-            return field.GetValue(sourceObject);
+                return field.GetValue(sourceObject);
+            }
         }
 
 
@@ -253,11 +262,20 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <param name="newFieldValue">The new value which will be assigned to the field.</param>
         public static void SetFieldValueWithReflection(FieldInfo field, object sourceObject, object newFieldValue)
         {
-            Type sourceObjectType = sourceObject.GetType();
-            if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
-                throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+            if (field.IsStatic)
+            {
+                if (!VerifyTypeForSecureReflectionUse(field.DeclaringType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The declaring type of static field " + field.DeclaringType.FullName + "." + field.Name + " is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+                field.SetValue(null, newFieldValue);
+            }
+            else
+            {
+                Type sourceObjectType = sourceObject.GetType();
+                if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
 
-            field.SetValue(sourceObject, newFieldValue);
+                field.SetValue(sourceObject, newFieldValue);
+            }
         }
 
         
@@ -298,11 +316,20 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <returns>The sourceObject's value of the property.</returns>
         public static object GetPropertyValueWithReflection(PropertyInfo property, object sourceObject)
         {
-            Type sourceObjectType = sourceObject.GetType();
-            if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
-                throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+            if (property.GetGetMethod().IsStatic)
+            {
+                if (!VerifyTypeForSecureReflectionUse(property.DeclaringType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The declaring type of static property " + property.DeclaringType.FullName + "." + property.Name + " is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+                return property.GetValue(null);
+            }
+            else
+            {
+                Type sourceObjectType = sourceObject.GetType();
+                if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
 
-            return property.GetValue(sourceObject);
+                return property.GetValue(sourceObject);
+            }
         }
         
         /// <summary>
@@ -342,11 +369,20 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <param name="newFieldValue">The new value which will be assigned to the property.</param>
         public static void SetPropertyValueWithReflection(PropertyInfo property, object sourceObject, object newFieldValue)
         {
-            Type sourceObjectType = sourceObject.GetType();
-            if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
-                throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+            if (property.GetSetMethod().IsStatic)
+            {
+                if (!VerifyTypeForSecureReflectionUse(property.DeclaringType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The declaring type of static property " + property.DeclaringType.FullName + "." + property.Name + " is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
+                property.SetValue(null, newFieldValue);
+            }
+            else
+            {
+                Type sourceObjectType = sourceObject.GetType();
+                if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
+                    throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
 
-            property.SetValue(sourceObject, newFieldValue);
+                property.SetValue(sourceObject, newFieldValue);
+            }
         }
         
 
