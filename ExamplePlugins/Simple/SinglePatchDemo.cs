@@ -36,7 +36,7 @@ namespace TTPluginsExamples.Simple
         {
             // Define our single patch operation.
             CreateHPatchOperation("Terraria.Player", "UpdateEquips", "PrefixPatch", HPatchLocation.Prefix);
-				// We will patch Terraria.Player.UpdateEquips into calling our custom PrefixPatch method before the original method executes.
+                // We will patch Terraria.Player.UpdateEquips into calling our custom PrefixPatch method before the original method executes.
         }
 
 
