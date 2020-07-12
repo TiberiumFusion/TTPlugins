@@ -338,11 +338,11 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// </summary>
         /// <param name="propertyName">The name of the property which will be written to. The sourceObject's type will be used to find the property.</param>
         /// <param name="sourceObject">The object that contains the property to write to.</param>
-        /// <param name="newFieldValue">The new value which will be assigned to the property.</param>
-        public static void SetPropertyValueWithReflection(string propertyName, object sourceObject, object newFieldValue)
+        /// <param name="newPropertyValue">The new value which will be assigned to the property.</param>
+        public static void SetPropertyValueWithReflection(string propertyName, object sourceObject, object newPropertyValue)
         {
             Type objectType = sourceObject.GetType();
-            SetPropertyValueWithReflection(objectType, propertyName, sourceObject, newFieldValue);
+            SetPropertyValueWithReflection(objectType, propertyName, sourceObject, newPropertyValue);
         }
         /// <summary>
         /// Sets the value of a property using Reflection. This method may incur considerable performance penalties.
@@ -351,14 +351,14 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <param name="type">The Type that contains the specified property to set.</param>
         /// <param name="propertyName">The name of the property which will be set.</param>
         /// <param name="sourceObject">The object that contains the property to set.</param>
-        /// <param name="newFieldValue">The new value which will be assigned to the property.</param>
-        public static void SetPropertyValueWithReflection(Type type, string propertyName, object sourceObject, object newFieldValue)
+        /// <param name="newPropertyValue">The new value which will be assigned to the property.</param>
+        public static void SetPropertyValueWithReflection(Type type, string propertyName, object sourceObject, object newPropertyValue)
         {
             PropertyInfo property = type.GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(x => x.Name == propertyName).FirstOrDefault();
             if (property == null)
                 throw new Exception("Invalid type & propertyName combination. The specified type \"" + type.FullName + "\" does not contain a property named \"" + propertyName + "\".");
 
-            SetPropertyValueWithReflection(property, sourceObject, newFieldValue);
+            SetPropertyValueWithReflection(property, sourceObject, newPropertyValue);
         }
         /// <summary>
         /// Sets the value of a property using Reflection. This method may incur considerable performance penalties.
@@ -366,14 +366,14 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// </summary>
         /// <param name="property">The PropertyInfo associated with the property to set.</param>
         /// <param name="sourceObject">The object that contains the property to set.</param>
-        /// <param name="newFieldValue">The new value which will be assigned to the property.</param>
-        public static void SetPropertyValueWithReflection(PropertyInfo property, object sourceObject, object newFieldValue)
+        /// <param name="newPropertyValue">The new value which will be assigned to the property.</param>
+        public static void SetPropertyValueWithReflection(PropertyInfo property, object sourceObject, object newPropertyValue)
         {
             if (property.GetSetMethod().IsStatic)
             {
                 if (!VerifyTypeForSecureReflectionUse(property.DeclaringType)) // Only allow Reflection upon whitelisted assemblies for security purposes
                     throw new Exception("The declaring type of static property " + property.DeclaringType.FullName + "." + property.Name + " is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
-                property.SetValue(null, newFieldValue);
+                property.SetValue(null, newPropertyValue);
             }
             else
             {
@@ -381,7 +381,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 if (!VerifyTypeForSecureReflectionUse(sourceObjectType)) // Only allow Reflection upon whitelisted assemblies for security purposes
                     throw new Exception("The type of sourceObject (" + sourceObjectType.FullName + ") is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
 
-                property.SetValue(sourceObject, newFieldValue);
+                property.SetValue(sourceObject, newPropertyValue);
             }
         }
         
