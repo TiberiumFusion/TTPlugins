@@ -73,6 +73,30 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             result = foundType;
             return true;
         }
+        /// <summary>
+        /// Gets the Type specified by its full name from any of the loaded XNA assemblies.
+        /// </summary>
+        /// <param name="typeFullName">The full name of the type to retrieve. Case-sensitive!</param>
+        /// <param name="result">Output for the found Type.</param>
+        /// <returns>True if the type was found, false if it was not.</returns>
+        public static bool TryGetXNAType(string typeFullName, out Type result)
+        {
+            if (String.IsNullOrEmpty(typeFullName))
+                throw new Exception("Provided typeFullName was null or 0 chracters.");
+            
+            foreach (Assembly asm in HPluginApplicator.XNAAssemblies)
+            {
+                Type foundType = asm.GetType(typeFullName, false, false);
+                if (foundType != null)
+                {
+                    result = foundType;
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
+        }
 
         /// <summary>
         /// Checks if a type is defined in the Terraria assembly.
