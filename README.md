@@ -1,4 +1,4 @@
-# TTPlugins Wiki
+# TTPlugins
 TTPlugins is the usercode plugin framework for [Terraria Tweaker 2](https://forums.terraria.org/index.php?threads/59796/), a Terraria client patcher. TTPlugins is included with Terraria Tweaker 2.3+ and allows users to modify Terraria by writing plugins that contain dynamic patches. In this way, Terraria Tweaker's patching framework is leveraged to simplify the process of modifying a compiled .NET assembly. Even if you have minimal knowledge of .NET or C#, creating your own Terraria modifications is very accessible with TTPlugins.
 
 ## What is a plugin?
