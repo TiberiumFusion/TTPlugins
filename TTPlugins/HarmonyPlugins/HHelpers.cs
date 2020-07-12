@@ -558,14 +558,17 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             /// <param name="baseScale">The scale of the drawn text.</param>
             /// <param name="maxWidth">The maximum width per line of the drawn text. Set to -1f for no max width.</param>
             /// <param name="spread">The spread of the text's shadow.</param>
-            public static void DrawStringWithShadow(SpriteBatch spriteBatch, ReLogic.Graphics.DynamicSpriteFont relogicDynamicSpriteFont, string text, Vector2 position, Color baseColor, float rotation, Vector2 origin, Vector2 baseScale, float maxWidth = -1f, float spread = 2f)
+            /// <param name="shadowColor">The color of the text's shadow. Set to null for the default black color.</param>
+            public static void DrawStringWithShadow(SpriteBatch spriteBatch, ReLogic.Graphics.DynamicSpriteFont relogicDynamicSpriteFont, string text, Vector2 position, Color baseColor, float rotation, Vector2 origin, Vector2 baseScale, float maxWidth = -1f, float spread = 2f, Color? shadowColor = null)
             {
                 Terraria.UI.Chat.TextSnippet message = new Terraria.UI.Chat.TextSnippet(text);
                 Terraria.UI.Chat.TextSnippet[] snippets = new Terraria.UI.Chat.TextSnippet[] { message };
                 Terraria.UI.Chat.ChatManager.ConvertNormalSnippets(snippets);
 
+                Color useShadowColor = shadowColor ?? new Color(0, 0, 0, 255);
+                useShadowColor.A = baseColor.A;
                 FixedDrawColorCodedStringShadow(Terraria.Main.spriteBatch, relogicDynamicSpriteFont, snippets,
-                                                                        position, new Color(0, 0, 0, baseColor.A), rotation,
+                                                                        position, useShadowColor, rotation,
                                                                         origin, baseScale, maxWidth, spread);
                 int dummy = 0;
                 FixedDrawColorCodedString(Terraria.Main.spriteBatch, relogicDynamicSpriteFont, snippets,
