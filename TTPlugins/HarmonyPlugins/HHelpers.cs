@@ -316,7 +316,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <returns>The sourceObject's value of the property.</returns>
         public static object GetPropertyValueWithReflection(PropertyInfo property, object sourceObject)
         {
-            if (property.GetGetMethod().IsStatic)
+            if (property.GetAccessors().Any(x => x.IsStatic))
             {
                 if (!VerifyTypeForSecureReflectionUse(property.DeclaringType)) // Only allow Reflection upon whitelisted assemblies for security purposes
                     throw new Exception("The declaring type of static property " + property.DeclaringType.FullName + "." + property.Name + " is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
@@ -369,7 +369,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <param name="newPropertyValue">The new value which will be assigned to the property.</param>
         public static void SetPropertyValueWithReflection(PropertyInfo property, object sourceObject, object newPropertyValue)
         {
-            if (property.GetSetMethod().IsStatic)
+            if (property.GetAccessors().Any(x => x.IsStatic))
             {
                 if (!VerifyTypeForSecureReflectionUse(property.DeclaringType)) // Only allow Reflection upon whitelisted assemblies for security purposes
                     throw new Exception("The declaring type of static property " + property.DeclaringType.FullName + "." + property.Name + " is not defined in the Terraria, ReLogic, or XNA assemblies. Operating on types outside of these assemblies with Reflection is prohibited.");
