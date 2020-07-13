@@ -654,7 +654,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             /// You probably shouldn't use this method directly. Use DrawString() or DrawStringWithShadow() instead.
             /// </summary>
             /// <param name="spriteBatch">The SpriteBatch to use for drawing.</param>
-            /// <param name="relogicDynamicSpriteFont">The ReLogic.Graphics.DynamicSpriteFont to use. Must be type-fixed (see TryCreateTypeFixedDynamicSpriteFontFromExisting()).</param>
+            /// <param name="relogicDynamicSpriteFont">The ReLogic.Graphics.DynamicSpriteFont to use.</param>
             /// <param name="snippets">An array of Terraria.UI.Chat.TextSnippets to draw.</param>
             /// <param name="position">The viewportspace position to draw the text at.</param>
             /// <param name="baseColor">The color of the drawn text.</param>
@@ -802,27 +802,27 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             /// <summary>
             /// Checks whether the specified key is currently held or not.
             /// </summary>
-            /// <param name="k">The key to check.</param>
+            /// <param name="key">The key to check.</param>
             /// <returns>True or false</returns>
-            public static bool IsKeyDown(Keys k)
+            public static bool IsKeyDown(Keys key)
             {
-                if (k == Keys.None) return false;
-                return Terraria.Main.keyState.IsKeyDown(k);
+                if (key == Keys.None) return false;
+                return Terraria.Main.keyState.IsKeyDown(key);
             }
 
             /// <summary>
             /// Checks whether the specified key was down on this update cycle and up on the last update cycle.
             /// </summary>
-            /// <param name="k">The key to check.</param>
+            /// <param name="key">The key to check.</param>
             /// <returns>True or false</returns>
-            public static bool IsKeyPressed(Keys k)
+            public static bool IsKeyPressed(Keys key)
             {
-                if (k == Keys.None) return false;
-                return (Terraria.Main.keyState.IsKeyDown(k) && !Terraria.Main.oldKeyState.IsKeyDown(k));
+                if (key == Keys.None) return false;
+                return (Terraria.Main.keyState.IsKeyDown(key) && !Terraria.Main.oldKeyState.IsKeyDown(key));
             }
             
             /// <summary>
-            /// Checks whether the base key was down on this tick and up on the last tick AND that the modifier key is currently held.
+            /// Checks whether the base key was down on this update cycle and up on the last update cycle AND that the modifier key is currently held.
             /// If the modifier key is Keys.None, the modifier key down check will be skipped.
             /// </summary>
             /// <param name="baseKey">The base key to check.</param>
