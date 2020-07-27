@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExamplePlugins", "ExamplePl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Simple", "Simple", "{952D9296-D7D2-4438-8710-0196304D5E6D}"
 	ProjectSection(SolutionItems) = preProject
-		ExamplePlugins\Simple\PrecompiledPluginDemo\PersistentSavedataDemo.cs = ExamplePlugins\Simple\PrecompiledPluginDemo\PersistentSavedataDemo.cs
+		ExamplePlugins\Simple\PersistentSavedataDemo.cs = ExamplePlugins\Simple\PersistentSavedataDemo.cs
 		ExamplePlugins\Simple\SinglePatchDemo.cs = ExamplePlugins\Simple\SinglePatchDemo.cs
 	EndProjectSection
 EndProject
