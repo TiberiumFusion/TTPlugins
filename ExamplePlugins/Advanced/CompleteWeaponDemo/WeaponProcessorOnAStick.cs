@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using com.tiberiumfusion.ttplugins.HarmonyPlugins;
 using Microsoft.Xna.Framework.Graphics;
-using System.IO;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
 
