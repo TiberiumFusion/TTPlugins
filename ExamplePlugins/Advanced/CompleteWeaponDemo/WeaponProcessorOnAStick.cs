@@ -81,7 +81,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
 
         public override void PrePatch()
         {
-            // This single HPlugins contains all the patch code and assets which constitute both the new weapon and its custom projectile.
+            // This single HPlugin contains all the patch code and assets which constitute both the new weapon and its custom projectile.
             // You could split the weapon and projectile into their own, seperate HPlugins, if that fits your project's organization better.
 
 
@@ -152,7 +152,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 // Load our weapon's texture from the embedded resource bytes we extracted in ConfigurationLoaded()
                 ItemGraphic = HHelpers.AssetHandling.CreateTexture2DFromImageBytes(ItemGraphicBytes, __instance.GraphicsDevice);
                     // Using CreateTexture2DFromImageBytes() is compliant with all security levels and is the recommended way to create Texture2Ds.
-                    // You could use your own Streams, but using Streams (or any other type in System.IO) will make you plugin violate Security Level 3.
+                    // You could use your own Streams, but using Streams (or any other type in System.IO) will make your plugin violate Security Level 3.
 
                 // We will also modify some necessary arrays here (this method will only be called once, so this is a good time to modify these arrays).
                 // There are many arrays which are indexed using the item's type (aka ID). We need to expand all those arrays to reach up to our item's ID.
@@ -261,7 +261,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 __instance.ResetStats(Type);
 
                 __instance.damage = 64; // How much damage projectiles from this weapon will do
-                __instance.mana = 10; // Costs 3 mana to use
+                __instance.mana = 10; // How much mana is required to use this weapon
                 __instance.shoot = 3001; // ID of the Projectile to shoot when used (which is our custom projectile)
                 __instance.shootSpeed = 5f; // Speed of the Projectile that this weapon shoots
                 __instance.knockBack = 1.5f; // Amount of knockback dealt when this weapon's Projectile hits something
@@ -549,7 +549,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 // Lerp at a constant 75% between the tile light and pure white to slightly modulate the projectile's color
                 Color projColorMix = Color.Lerp(lightAtProjPos, Color.White, 0.75f);
 
-                // Fade out the projectile if its close to being removed
+                // Fade out the projectile if it's close to being removed
                 if (proj.timeLeft <= 30)
                     projColorMix = projColorMix * (proj.timeLeft / 30f);
 
