@@ -11,7 +11,7 @@ Generally speaking, a plugin is any module of external code that runs on a frame
 * Various framework helpers available to user plugin code
 
 ### Dynamic patching
-TTPlugins uses the fantastic [Harmony](https://github.com/pardeike/Harmony/wiki) library to patch Terraria at runtime. Harmony modifies the execution flow of .NET applications in memory and does not touch any on-disk files.
+TTPlugins uses the fantastic [Harmony](https://github.com/pardeike/Harmony) library to patch Terraria at runtime. Harmony modifies the execution flow of .NET applications in memory and does not touch any on-disk files.
 
 ### How easy is it?
 Here's a quick example of a super basic but fully functional plugin that gives the player superspeed. This is the entire plugin source code. Optional plugin features, like Identity and persistent savedata, are not present in this example.
