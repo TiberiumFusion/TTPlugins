@@ -12,7 +12,6 @@ using com.tiberiumfusion.ttplugins.HarmonyPlugins;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Terraria;
 
 namespace {{TEMPLATE_NAMESPACE}}
 {
