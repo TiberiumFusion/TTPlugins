@@ -278,7 +278,10 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                             if (foundSourcePath != null)
                                                 break;
 
-                                            SequencePoint seqPoint = ins.SequencePoint;
+                                            // Cecil 0.10+ breaking API change: Instruction.SequencePoint is removed
+                                            SequencePoint seqPoint = null;
+                                            try { seqPoint = methodDef.DebugInformation.GetSequencePoint(ins); } // In case the method is missing debug information or it is corrupt in some way
+                                            catch (Exception e) { /* Swallow */ }
                                             if (seqPoint != null)
                                             {
                                                 if (seqPoint.Document != null)

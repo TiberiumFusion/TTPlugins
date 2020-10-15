@@ -58,8 +58,14 @@ namespace com.tiberiumfusion.ttplugins.Management
         private static string CreateInstructionViolationMessage(TypeDefinition typeDef, MethodDefinition methodDef, Instruction ins, string remarks)
         {
             string location = "";
-            if (ins.SequencePoint != null && ins.SequencePoint.Document != null)
-                location = "\nLocation: " + ins.SequencePoint.Document.Url + " at line(s) " + ins.SequencePoint.StartLine + "-" + ins.SequencePoint.EndLine + ", position " + ins.SequencePoint.StartColumn;
+            
+            // Cecil 0.10+ breaking API change: Instruction.SequencePoint is removed
+            SequencePoint seqPoint = null;
+            try { seqPoint = methodDef.DebugInformation.GetSequencePoint(ins); } // In case the method is missing debug information or it is corrupt in some way
+            catch (Exception e) { /* Swallow */ }
+
+            if (seqPoint != null && seqPoint.Document != null)
+                location = "\nLocation: " + seqPoint.Document.Url + " at line(s) " + seqPoint.StartLine + "-" + seqPoint.EndLine + ", position " + seqPoint.StartColumn;
 
             return "Violation in Type: " + typeDef.FullName
                  + "\n    in Method: " + methodDef.Name
@@ -394,7 +400,7 @@ namespace com.tiberiumfusion.ttplugins.Management
                         compileConfig.DeleteOutputFilesFromDiskWhenDone = false; // Keep the output files so we can load the PDBs for the cecil-based security tests
                         compileConfig.ReferencesOnDisk.Add(testConfig.TerrariaPath);
                         compileConfig.ReferencesInMemory.AddRange(testConfig.TerrariaDependencyAssemblies);
-                        if (firstCompile && testConfig.PluginFilesToTest.Count > 1) // Write the Terraria dependencies to disk on the first compile...
+                        if (firstCompile) // Write the Terraria dependencies to disk on the first compile...
                         {
                             compileConfig.ClearTemporaryFilesWhenDone = false;
                             compileConfig.ReuseTemporaryFiles = false;

@@ -271,3 +271,6 @@ ExamplePlugins/Advanced/CompleteWeaponDemo/Assets/Sourcing/
 
 # Docs
 Sandcastle/
+
+# Local release copies
+Releases/
