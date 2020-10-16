@@ -29,7 +29,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         public Dictionary<string, string> PluginTypesRelativePaths { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
-        /// Path to the root folder to use for temporary plugin files (i.e. temporary configuration & savedata copies).
+        /// Path to the root folder to use for temporary plugin files (i.e. temporary configuration and savedata copies).
         /// </summary>
         public string PluginTemporaryFilesRootDirectory { get; set; }
         
