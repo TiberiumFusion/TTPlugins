@@ -658,6 +658,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                                     HarmonyInstance.Patch(patchOp.TargetMethod, new HarmonyMethod(patchOp.StubMethod, patchOp.PatchPriority));
                                 else if (patchOp.PatchLocation == HPatchLocation.Postfix)
                                     HarmonyInstance.Patch(patchOp.TargetMethod, null, new HarmonyMethod(patchOp.StubMethod, patchOp.PatchPriority));
+                                else if (patchOp.PatchLocation == HPatchLocation.Transpiler)
+                                    HarmonyInstance.Patch(patchOp.TargetMethod, null, null, new HarmonyMethod(patchOp.StubMethod, patchOp.PatchPriority));
 
                                 if (!AppliedHPlugins.Contains(supervisedPlugin))
                                     AppliedHPlugins.Add(supervisedPlugin);
