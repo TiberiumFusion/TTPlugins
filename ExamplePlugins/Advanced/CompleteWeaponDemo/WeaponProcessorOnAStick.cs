@@ -382,7 +382,8 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 Helper_ExpandArray(ref Terraria.Main.projHostile, ProjectileID, false);
                 Helper_ExpandArray(ref Terraria.Main.projPet, ProjectileID, false);
                 Helper_ExpandArray(ref Terraria.ID.ProjectileID.Sets.CanDistortWater, ProjectileID, false);
-                Helper_ExpandArray(ref Terraria.ID.ProjectileID.Sets.CountsAsHoming, ProjectileID, false);
+                //Helper_ExpandArray(ref Terraria.ID.ProjectileID.Sets.CountsAsHoming, ProjectileID, false);
+                    // CountsAsHoming no longer exists as of 1.4.3.0
                 Helper_ExpandArray(ref Terraria.ID.ProjectileID.Sets.DismountsPlayersOnHit, ProjectileID, false);
                 Helper_ExpandArray(ref Terraria.ID.ProjectileID.Sets.DontApplyParryDamageBuff, ProjectileID, false);
                 Helper_ExpandArray(ref Terraria.ID.ProjectileID.Sets.DontAttachHideToAlpha, ProjectileID, false);

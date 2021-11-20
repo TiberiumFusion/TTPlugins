@@ -51,13 +51,11 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Terraria.Libraries.ReLogic.ReLogic1422">
-      <HintPath>..\..\..\ExternalReferences\Terraria.Libraries.ReLogic.ReLogic1422.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Terraria.Libraries.ReLogic.ReLogic1430">
+      <HintPath>..\..\..\ExternalReferences\Terraria.Libraries.ReLogic.ReLogic1430.dll</HintPath>
     </Reference>
-    <Reference Include="Terraria1422">
-      <HintPath>..\..\..\ExternalReferences\Terraria1422.exe</HintPath>
-      <Private>False</Private>
+    <Reference Include="Terraria1430">
+      <HintPath>..\..\..\ExternalReferences\Terraria1430.exe</HintPath>
     </Reference>
     <Reference Include="TTPlugins">
       <HintPath>..\..\References\TTPlugins.dll</HintPath>
