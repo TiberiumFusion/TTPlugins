@@ -39,8 +39,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Terraria1422">
-      <HintPath>..\..\..\ExternalReferences\Terraria1422.exe</HintPath>
+    <Reference Include="Terraria1430">
+      <HintPath>..\..\..\ExternalReferences\Terraria1430.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="TTPlugins, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

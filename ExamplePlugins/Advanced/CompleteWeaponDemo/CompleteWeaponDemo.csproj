@@ -53,9 +53,11 @@
     <Reference Include="System.Xml" />
     <Reference Include="Terraria.Libraries.ReLogic.ReLogic1430">
       <HintPath>..\..\..\ExternalReferences\Terraria.Libraries.ReLogic.ReLogic1430.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Terraria1430">
       <HintPath>..\..\..\ExternalReferences\Terraria1430.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="TTPlugins">
       <HintPath>..\..\References\TTPlugins.dll</HintPath>
