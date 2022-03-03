@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("TTPlugins")]
-[assembly: AssemblyDescription("Usercode plugin system for Terraria Tweaker 2")]
+[assembly: AssemblyDescription("User plugin system for Terraria Tweaker 2")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("TiberiumFusion")]
 [assembly: AssemblyProduct("TTPlugins")]
-[assembly: AssemblyCopyright("Copyright © TiberiumFusion 2021")]
+[assembly: AssemblyCopyright("Copyright © TiberiumFusion 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.1.3")]
-[assembly: AssemblyFileVersion("1.1.1.3")]
+[assembly: AssemblyVersion("1.1.1.4")]
+[assembly: AssemblyFileVersion("1.1.1.4")]
