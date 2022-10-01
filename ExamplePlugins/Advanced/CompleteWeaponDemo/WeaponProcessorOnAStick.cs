@@ -94,7 +94,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 // We'll do 1, 2, and 3 in this one patch stub method, since the host method (LoadContent) only runs once
             
             // 4. Patch Terraria.Item.SetDefaults to give our weapon's Item some defaults
-            CreateHPatchOperation("Terraria.Item", "SetDefaults", 2, "SetDefaults_SetItemDefaults", HPatchLocation.Prefix);
+            CreateHPatchOperation("Terraria.Item", "SetDefaults", 3, "SetDefaults_SetItemDefaults", HPatchLocation.Prefix);
                 // SetDefaults is overloaded, so we need to make sure we patch the right one (so we use the CreateHPatchOperation() overload that lets us specify the parameter count of the target method).
             
             // 5. Patch Terraria.Item.RebuildTooltip to give our item some tooltip text.
@@ -136,7 +136,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
             CreateHPatchOperation("Terraria.Projectile", "Kill", "Kill_KillProjectile", HPatchLocation.Prefix);
                 // This is only half of the fade-out effect. The other half is in the DrawProj patch, which recognizes the fade-out period and makes the projectile's texture more transparent the closer it gets to being removed
         }
-
+        
         #endregion
 
 
@@ -153,7 +153,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 ItemGraphic = HHelpers.AssetHandling.CreateTexture2DFromImageBytes(ItemGraphicBytes, __instance.GraphicsDevice);
                     // Using CreateTexture2DFromImageBytes() is compliant with all security levels and is the recommended way to create Texture2Ds.
                     // You could use your own Streams, but using Streams (or any other type in System.IO) will make your plugin violate Security Level 3.
-
+                
                 // We will also modify some necessary arrays here (this method will only be called once, so this is a good time to modify these arrays).
                 // There are many arrays which are indexed using the item's type (aka ID). We need to expand all those arrays to reach up to our item's ID.
                 // We will fill the placeholder spaces between the last vanilla ID and our new ID with default values.
@@ -164,11 +164,13 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.AlsoABuildingItem, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.AnimatesAsSoul, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.BonusMeleeSpeedMultiplier, WeaponItemID, 1f);
+                Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.BossBag, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.CanBePlacedOnWeaponRacks, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.CanBeQuickusedOnGamepad, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.CanGetPrefixes, WeaponItemID, false);
                     Terraria.ID.ItemID.Sets.CanGetPrefixes[WeaponItemID] = true; // Our item is a weapon & we want to it be able to get prefixes, so we set this to true for our slot
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.Deprecated, WeaponItemID, false);
+                Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.DrawUnsafeIndicator, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.DrinkParticleColors, WeaponItemID, new Color[0]);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.ExtractinatorMode, WeaponItemID, -1);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.FoodParticleColors, WeaponItemID, new Color[0]);
@@ -542,7 +544,7 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 Terraria.Projectile proj = Terraria.Main.projectile[i];
 
                 // This must be called before any projectile is drawn
-                __instance.PrepareDrawnEntityDrawing(proj, Terraria.Main.GetProjectileDesiredShader(i));
+                __instance.PrepareDrawnProjectileDrawing(proj);
 
                 // Get how much light is at the projectile's current position (will be used for a slight color modulation effect)
                 Color lightAtProjPos = Terraria.Lighting.GetColor((int)(proj.position.X + (proj.width * 0.5f)) / 16,

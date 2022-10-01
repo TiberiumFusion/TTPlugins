@@ -1,4 +1,6 @@
-﻿using System;
+﻿extern alias harmony;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using HarmonyLib;
+using harmony::HarmonyLib;
 
 namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 {
