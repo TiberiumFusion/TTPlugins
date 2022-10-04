@@ -85,12 +85,12 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Terraria.Libraries.ReLogic.ReLogic1442">
-      <HintPath>..\ExternalReferences\Terraria.Libraries.ReLogic.ReLogic1442.dll</HintPath>
+    <Reference Include="Terraria.Libraries.ReLogic.ReLogic1443">
+      <HintPath>..\ExternalReferences\Terraria.Libraries.ReLogic.ReLogic1443.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Terraria1442">
-      <HintPath>..\ExternalReferences\Terraria1442.exe</HintPath>
+    <Reference Include="Terraria1443">
+      <HintPath>..\ExternalReferences\Terraria1443.exe</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

@@ -39,8 +39,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Terraria1442">
-      <HintPath>..\..\References\Terraria1442.exe</HintPath>
+    <Reference Include="Terraria1443, Version=1.4.4.3, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\References\Terraria1443.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="TTPlugins, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
