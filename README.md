@@ -38,4 +38,4 @@ Please refer to the [Wiki](https://github.com/TiberiumFusion/TTPlugins/wiki) for
 This repository contains several [example plugins](https://github.com/TiberiumFusion/TTPlugins/tree/master/ExamplePlugins) that cover some common & advanced plugin tasks.
 
 ### Technical documentation
-Complete reference docs for TTPlugins can be found [here](https://www.tiberiumfusion.com/product/ttplugins/reference/html/432f1745-05bc-1912-8400-537f02fafa44.htm). Please note that this material has very sparse descriptions & remarks and may only be helpful to advanced plugin authors. The primary how-to documentation is on the [Wiki](https://github.com/TiberiumFusion/TTPlugins/wiki).
+Complete reference docs for TTPlugins can be found [here](https://www.tiberiumfusion.com/product/ttplugins/reference/1.2.0.0/). Please note that this material has very sparse descriptions & remarks and may only be helpful to advanced plugin authors. The primary how-to documentation is on the [Wiki](https://github.com/TiberiumFusion/TTPlugins/wiki).
