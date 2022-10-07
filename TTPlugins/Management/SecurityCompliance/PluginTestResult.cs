@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.tiberiumfusion.ttplugins.Management
+namespace com.tiberiumfusion.ttplugins.Management.SecurityCompliance
 {
     /// <summary>
     /// Container of secury compliance test results for a single PluginFile.
     /// </summary>
-    public class SecurityLevelComplianceSingleTestResult
+    public class PluginTestResult
     {
         /// <summary>
         /// Whether or not an unexpected exception occurred during the test.
@@ -22,7 +22,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         public bool CompileFailure = false;
 
         /// <summary>
-        /// Messages from the testing process that are not specific to the individual security tests.
+        /// Messages from the testing process that are not related to any specific level of the security tests.
         /// </summary>
         public List<string> GenericMessages = new List<string>();
 
@@ -96,7 +96,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// Creates a new SecurityLevelComplianceSingleTestResult for the specified PluginFile.
         /// </summary>
         /// <param name="pluginFileToTest">The PluginFile to associate with these test results.</param>
-        public SecurityLevelComplianceSingleTestResult(PluginFile pluginFileToTest)
+        public PluginTestResult(PluginFile pluginFileToTest)
         {
             TestedPluginFile = pluginFileToTest;
         }

@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using com.tiberiumfusion.ttplugins.Management;
+using com.tiberiumfusion.ttplugins.Management.SecurityCompliance;
 using harmony::HarmonyLib;
 
 namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
@@ -76,6 +78,16 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// The Harmony assembly that was embedded into Terraria by TTApplicator.
         /// </summary>
         internal static Assembly EmbeddedHarmonyAssembly { get; private set; }
+
+        /// <summary>
+        /// The Cecil assembly that was embedded into Terraria by TTApplicator.
+        /// </summary>
+        internal static Assembly EmbeddedCecilAssembly { get; private set; }
+
+        /// <summary>
+        /// The Cecil PDB assembly that was embedded into Terraria by TTApplicator.
+        /// </summary>
+        internal static Assembly EmbeddedCecilPdbAssembly { get; private set; }
 
         /// <summary>
         /// A list of all plugin assemblies that were loaded into the current AppDomain.
@@ -234,6 +246,59 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     if (PluginDebugMode) throw e;
                     return;
                 }
+                
+                // Extract Cecil
+                DLog("Extracting Cecil assemblies to runtime extract dir...");
+                EmbeddedCecilAssembly = null;
+                EmbeddedCecilPdbAssembly = null;
+                string cecilAsmDisplayName = null;
+                string cecilPdbAsmDisplayName = null;
+                try
+                {
+                    using (var resStream = TerrariaAssembly.GetManifestResourceStream("TTPlugins_Cecil.dll"))
+                    {
+                        using (var memStream = new MemoryStream())
+                        {
+                            resStream.CopyTo(memStream);
+                            byte[] asmBytes = memStream.ToArray();
+                            string asmPath = Path.Combine(RuntimeExtractFolder, "Mono.Cecil.dll");
+                            File.WriteAllBytes(asmPath, asmBytes);
+                            AssemblyName asmName = AssemblyName.GetAssemblyName(asmPath);
+                            cecilAsmDisplayName = asmName.FullName;
+                        }
+                    }
+
+                    if (PluginDebugMode)
+                    {
+                        using (var resStream = TerrariaAssembly.GetManifestResourceStream("TTPlugins_CecilPdb.dll"))
+                        {
+                            using (var memStream = new MemoryStream())
+                            {
+                                resStream.CopyTo(memStream);
+                                byte[] asmBytes = memStream.ToArray();
+                                string cecilAsmPath = Path.Combine(RuntimeExtractFolder, "Mono.Cecil.Pdb.dll");
+                                File.WriteAllBytes(cecilAsmPath, asmBytes);
+                                AssemblyName harmonyAsmName = AssemblyName.GetAssemblyName(cecilAsmPath);
+                                cecilPdbAsmDisplayName = harmonyAsmName.FullName;
+                            }
+                        }
+                    }
+
+                    DLog("success", false);
+                }
+                catch (Exception e)
+                {
+                    DLog("failed, plugin application will be aborted. Details: " + e);
+                    if (PluginDebugMode) throw e;
+                    return;
+                }
+
+                // Load cecil
+                DLog("Loading extracted Cecil assemblies...");
+                EmbeddedCecilAssembly = Assembly.Load(cecilAsmDisplayName);
+                if (PluginDebugMode)
+                    EmbeddedCecilPdbAssembly = Assembly.Load(cecilPdbAsmDisplayName);
+                DLog("done", false);
 
                 // Get plugin mode config
                 DLog("Reading PluginDebugMode from config...");
@@ -247,7 +312,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
 
                 // Extract the plugin assemblies specified in the config doc
                 ExtractedPluginAssemblyPaths.Clear();
-                List<string> pluginAsmsToLoadByDisplayNames = new List<string>();
+                List<Tuple<string, string>> pluginAsmsToTest = new List<Tuple<string, string>>(); // Tuple<embedded asm name, path on disk>
                 DLog("Extracting plugin assemblies...");
                 XElement PluginAsmResourceNames = configDocBase.Element("PluginAsmResourceNames");
                 foreach (XElement resNameElement in PluginAsmResourceNames.Nodes())
@@ -300,27 +365,131 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                         }
                         Thread.Sleep(50); // Extra insurance for slow disks
                         ExtractedPluginAssemblyPaths.Add(extractDLLPath);
-                        AssemblyName asmName = AssemblyName.GetAssemblyName(extractDLLPath); // Get and store the assembly's display name so we can load it with Load()
-                        pluginAsmsToLoadByDisplayNames.Add(asmName.FullName);
+                        pluginAsmsToTest.Add(new Tuple<string, string>(asmResourceName, extractDLLPath));
                         DLog("done", false);
                     }
                 }
                 DLog("Extract plugin assemblies done");
 
-                // Now load all 0Harmony and all extracted assemblies into the default context using Load()
+                // Early exit - no plugins to load
+                if (pluginAsmsToTest.Count == 0)
+                {
+                    DLog("No plugins were extracted per plugin configuration. Aborting TTPlugins application. No plugins will be applied to Terraria.");
+                    return;
+                }
+
+                // Test extracted plugin assemblies against the security level specified in the plugin config
+                DLog("Validating plugin assemblies...");
+                List<string> pluginsWhichPassedSecurity = new List<string>(); // List<plugin path on disk>
+                List<string> pluginsWhichFailedSecurity = new List<string>(); // ditto
+                try
+                {
+                    Dictionary<PluginFile, Tuple<string, string>> pluginAssembliesToTest = new Dictionary<PluginFile, Tuple<string, string>>(); // PluginFile -> Tuple<embedded asm name, path on disk>
+                    foreach (Tuple<string, string> pluginAsmInfo in pluginAsmsToTest)
+                    {
+                        PluginFile pluginFile = new PluginFile(pluginAsmInfo.Item2, PluginFileType.CompiledAssemblyFile);
+                        pluginAssembliesToTest[pluginFile] = pluginAsmInfo;
+                    }
+
+                    var securityTestConfig = new PluginTestConfiguration();
+                    securityTestConfig.PluginFilesToTest = pluginAssembliesToTest.Keys.ToList();
+                    securityTestConfig.TerrariaEnvironment = TerrariaEnvironment.Online;
+                    securityTestConfig.RunLevel1Test = (SecurityLevel >= 1); // Only test up to the chosen security level
+                    securityTestConfig.RunLevel2Test = (SecurityLevel >= 2);
+                    securityTestConfig.RunLevel3Test = (SecurityLevel >= 3);
+                    securityTestConfig.RunLevel4Test = (SecurityLevel >= 4);
+
+                    var testResults = CecilTests.TestPluginCompliance(securityTestConfig);
+
+                    // Go through security results and find plugins that passed
+                    foreach (PluginFile testResultPluginFile in testResults.IndividualResults.Keys)
+                    {
+                        Tuple<string, string> pluginAsmInfo = pluginAssembliesToTest[testResultPluginFile]; // Tuple<embedded asm name, path on disk>
+                        PluginTestResult individualResult = testResults.IndividualResults[testResultPluginFile];
+                        
+                        bool valid = true;
+
+                        DLog("Validation results for plugin: " + pluginAsmInfo.Item1, 2);
+
+                        // Failure not specific to the individual levels of the security tests
+                        if (individualResult.GenericTestFailure)
+                        {
+                            valid = false;
+                            DLog("Plugin experienced a generic verification error. Details:", 3);
+                            foreach (string message in individualResult.GenericMessages)
+                                DLog("- " + message, 4);
+                        }
+    
+                        // Failure by violating security level(s)
+                        if (individualResult.TestedLevel1 && !individualResult.PassLevel1)
+                        {
+                            valid = false;
+                            DLog("Plugin violated security level 1. Details:", 3);
+                            foreach (string message in individualResult.MessagesLevel1)
+                                DLog("- " + message, 4);
+                        }
+                        if (individualResult.TestedLevel2 && !individualResult.PassLevel2)
+                        {
+                            valid = false;
+                            DLog("Plugin violated security level 2. Details:", 3);
+                            foreach (string message in individualResult.MessagesLevel2)
+                                DLog("- " + message, 4);
+                        }
+                        if (individualResult.TestedLevel3 && !individualResult.PassLevel3)
+                        {
+                            valid = false;
+                            DLog("Plugin violated security level 3. Details:", 3);
+                            foreach (string message in individualResult.MessagesLevel3)
+                                DLog("- " + message, 4);
+                        }
+                        if (individualResult.TestedLevel4 && !individualResult.PassLevel4)
+                        {
+                            valid = false;
+                            DLog("Plugin violated security level 4. Details:", 3);
+                            foreach (string message in individualResult.MessagesLevel4)
+                                DLog("- " + message, 4);
+                        }
+
+                        if (valid)
+                            pluginsWhichPassedSecurity.Add(pluginAsmInfo.Item2);
+                        else
+                        {
+                            pluginsWhichFailedSecurity.Add(pluginAsmInfo.Item2);
+                            DLog("Plugin failed validation and will not be loaded");
+
+                            // TODO: Add a section to the PluginReport which shows plugins that failed security
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    DLog("An unhandled exception occurred while validating plugins. Aborting TTPlugins application. No plugins will be applied to Terraria.");
+                    if (PluginDebugMode) throw e;
+                    return;
+                }
+
+                // Early exit - no plugins pass security
+                if (pluginsWhichPassedSecurity.Count == 0)
+                {
+                    DLog("All plugins failed validation. Aborting TTPlugins application. No plugins will be applied to Terraria.");
+                    return;
+                }
+
+                // Load all 0Harmony and all extracted plugin assemblies which passed security into the default context using Load()
                 DLog("Loading extracted assemblies...");
 
                 // Load Harmony first
-                DLog("Loading extracted Harmony assembly...");
+                DLog("Loading extracted Harmony assembly...", 2);
                 EmbeddedHarmonyAssembly = Assembly.Load(harmonyAsmDisplayName);
                 DLog("done", false);
 
                 // Then plugin asms
                 LoadedPluginAssemblies.Clear();
-                foreach (string pluginAsmDisplayName in pluginAsmsToLoadByDisplayNames)
+                foreach (string pluginPath in pluginsWhichPassedSecurity)
                 {
-                    DLog("Loading extracted plugin assembly\" " + pluginAsmDisplayName + "...");
-                    Assembly pluginAsm = Assembly.Load(pluginAsmDisplayName);
+                    AssemblyName pluginAsmName = AssemblyName.GetAssemblyName(pluginPath);
+                    DLog("Loading extracted plugin assembly\" " + pluginAsmName.Name + "...", 2);
+                    Assembly pluginAsm = Assembly.Load(pluginAsmName); // Load plugins into the primary assembly context
                     LoadedPluginAssemblies.Add(pluginAsm);
                     DLog("done", false);
                 }

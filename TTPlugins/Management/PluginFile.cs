@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using com.tiberiumfusion.ttplugins.Management.SecurityCompliance;
 
 namespace com.tiberiumfusion.ttplugins.Management
 {
@@ -88,16 +89,22 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// <summary>
         /// Tests this PluginFile against all security levels so as to determine the maximum security level that will allow this plugin to function.
         /// </summary>
+        /// <remarks>
+        /// This method should only be used by management tools (i.e. TT2 and TTApp).
+        /// </remarks>
         /// <param name="terrariaPath">Path to Terraria.exe, which will be referenced by CodeDom during compilation.</param>
         /// <param name="terrariaDependencyAssemblies">List of Terraria.exe's embedded dependency assemblies, which will be temporarily written to disk and reference by CodeDom during compilation.</param>
+        /// <param name="additionalCompileDependencies">Optional list of on-disk paths to additional assemblies that may be required for plugin compilation.</param>
         /// <returns>A SecurityLevelComplianceTestResult object containing the test results.</returns>
-        public SecurityLevelComplianceTestsResults TestAllSecurityLevelCompliance(string terrariaPath, List<byte[]> terrariaDependencyAssemblies)
+        public MultipleTestsResults TestAllSecurityLevelCompliance(string terrariaPath, List<byte[]> terrariaDependencyAssemblies, List<string> additionalCompileDependencies = null)
         {
-            SecurityLevelComplianceTestConfiguration config = new SecurityLevelComplianceTestConfiguration();
+            PluginTestConfiguration config = new PluginTestConfiguration();
             config.PluginFilesToTest = new List<PluginFile>() { this };
+            config.TerrariaEnvironment = TerrariaEnvironment.Offline;
             config.TerrariaPath = terrariaPath;
             config.TerrariaDependencyAssemblies = terrariaDependencyAssemblies;
-            return SecurityComplianceCecilTests.TestPluginCompliance(config);
+            config.AdditionalCompileDependencies = additionalCompileDependencies;
+            return CecilTests.TestPluginCompliance(config);
         }
     }
 }

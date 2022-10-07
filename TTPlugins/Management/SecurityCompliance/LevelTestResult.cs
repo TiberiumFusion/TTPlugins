@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.tiberiumfusion.ttplugins.Management
+namespace com.tiberiumfusion.ttplugins.Management.SecurityCompliance
 {
     /// <summary>
-    /// Holder of the test results of a security compliance test.
+    /// Holder of the test results of a security compliance test for a single level.
     /// </summary>
-    public class SecurityComplianceSingleCecilTestResult
+    public class LevelTestResult
     {
         /// <summary>
         /// Whether or not the assembly passed the test.
@@ -26,7 +26,7 @@ namespace com.tiberiumfusion.ttplugins.Management
         /// </summary>
         /// <param name="passed">The value to assign to the Passed property.</param>
         /// <param name="messages">The value to assign to the Messages property.</param>
-        public SecurityComplianceSingleCecilTestResult(bool passed, List<string> messages)
+        public LevelTestResult(bool passed, List<string> messages)
         {
             Passed = passed;
             Messages = messages;
