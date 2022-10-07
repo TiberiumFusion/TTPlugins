@@ -201,7 +201,6 @@ namespace TTPluginsExamples.Advanced.CompleteWeaponDemo
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.LockOnIgnoresCollision, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.NebulaPickup, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.NeverAppearsAsNewInInventory, WeaponItemID, false);
-                Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.NewItemSpawnPriority, WeaponItemID, 0);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.SingleUseInGamepad, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.SkipsInitialUseSound, WeaponItemID, false);
                 Helper_ExpandArray(ref Terraria.ID.ItemID.Sets.SummonerWeaponThatScalesWithAttackSpeed, WeaponItemID, false);
