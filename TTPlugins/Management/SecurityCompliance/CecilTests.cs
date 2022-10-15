@@ -66,23 +66,7 @@ namespace com.tiberiumfusion.ttplugins.Management.SecurityCompliance
             
             return false;
         }
-
-        /*
-        /// <summary>
-        /// Multi-input version of <see cref="IsClrNameInList(string, List{string})"/>.
-        /// </summary>
-        /// <returns>True if all canonicalized <paramref name="clrNames"/> are in canonicalized <paramref name="checkClrNames"/>. False otherwise.</returns>
-        private static bool AreAllClrNamesInList(List<string> clrNames, List<string> checkClrNames)
-        {
-            bool pass = true;
-
-            foreach (string clrName in clrNames)
-                pass &= IsClrNameInList(clrName, checkClrNames);
-
-            return pass;
-        }
-        */
-
+        
         /// <summary>
         /// Gets the generic arguments (if any) involved in the provided type's signature.
         /// </summary>

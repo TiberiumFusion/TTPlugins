@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="Forms\NamespaceDoc.cs" />
     <Compile Include="Forms\PluginReport.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -116,7 +117,9 @@
     <Compile Include="HarmonyPlugins\HPluginConfiguration.cs" />
     <Compile Include="HarmonyPlugins\HPluginIdentity.cs" />
     <Compile Include="HarmonyPlugins\HSupervisedPlugin.cs" />
+    <Compile Include="HarmonyPlugins\NamespaceDoc.cs" />
     <Compile Include="Management\IO.cs" />
+    <Compile Include="Management\NamespaceDoc.cs" />
     <Compile Include="Management\PluginFile.cs" />
     <Compile Include="Management\PluginFileType.cs" />
     <Compile Include="Management\SecurityCompliance\CecilTests.cs" />
@@ -126,6 +129,7 @@
     <Compile Include="Management\SecurityCompliance\PluginTestConfiguration.cs" />
     <Compile Include="Management\SecurityCompliance\MultipleTestsResults.cs" />
     <Compile Include="Management\TerrariaEnvironment.cs" />
+    <Compile Include="NamespaceDoc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
