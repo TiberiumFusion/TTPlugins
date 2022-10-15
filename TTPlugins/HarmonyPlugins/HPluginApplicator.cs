@@ -394,8 +394,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     var securityTestConfig = new PluginTestConfiguration();
                     securityTestConfig.PluginFilesToTest = pluginAssembliesToTest.Keys.ToList();
                     securityTestConfig.TerrariaEnvironment = TerrariaEnvironment.Online;
-                    securityTestConfig.RunLevel1Test = (SecurityLevel >= 1); // Only test up to the chosen security level
-                    securityTestConfig.RunLevel2Test = (SecurityLevel >= 2);
+                    securityTestConfig.RunLevel1Test = true; // Level 1 is always enforced
+                    securityTestConfig.RunLevel2Test = (SecurityLevel >= 2); // For the remaining levels, only test up to the user's chosen security level
                     securityTestConfig.RunLevel3Test = (SecurityLevel >= 3);
                     securityTestConfig.RunLevel4Test = (SecurityLevel >= 4);
 
