@@ -125,6 +125,7 @@
     <Compile Include="Management\SecurityCompliance\CecilTests.cs" />
     <Compile Include="Management\SecurityCompliance\LevelTestResult.cs" />
     <Compile Include="Management\SecurityCompliance\LevelTestConfiguration.cs" />
+    <Compile Include="Management\SecurityCompliance\NamespaceDoc.cs" />
     <Compile Include="Management\SecurityCompliance\PluginTestResult.cs" />
     <Compile Include="Management\SecurityCompliance\PluginTestConfiguration.cs" />
     <Compile Include="Management\SecurityCompliance\MultipleTestsResults.cs" />
