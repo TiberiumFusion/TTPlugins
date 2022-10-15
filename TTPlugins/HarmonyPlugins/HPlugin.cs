@@ -67,8 +67,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Creates a new patch operation using the supplied target method, stub method, and patch location.
         /// </summary>
         /// <param name="targetMethod">The target method (in Terraria) that will be patched.</param>
-        /// <param name="stubMethod">The stub method (in your plugin) that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethod">The stub method (in your plugin) that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(MethodBase targetMethod, MethodInfo stubMethod, HPatchLocation patchLocation, int patchPriority = -1)
         {
@@ -80,8 +80,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// </summary>
         /// <param name="targetType">The target type (in Terraria) that contains the target method.</param>
         /// <param name="targetMethodName">The name of the target method.</param>
-        /// <param name="stubMethod">The stub method (in your plugin) that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethod">The stub method (in your plugin) that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(Type targetType, string targetMethodName, MethodInfo stubMethod, HPatchLocation patchLocation, int patchPriority = -1)
         {
@@ -92,8 +92,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// Creates a new patch operation using the supplied target method, stub method name from this class, and patch location.
         /// </summary>
         /// <param name="targetMethod">The target method (in Terraria) that will be patched.</param>
-        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(MethodBase targetMethod, string stubMethodName, HPatchLocation patchLocation, int patchPriority = -1)
         {
@@ -111,8 +111,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// </summary>
         /// <param name="targetType">The target type (in Terraria) that contains the target method.</param>
         /// <param name="targetMethodName">The name of the target method.</param>
-        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(Type targetType, string targetMethodName, string stubMethodName, HPatchLocation patchLocation, int patchPriority = -1)
         {
@@ -130,8 +130,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// </summary>
         /// <param name="targetTypeFullName">The full name of target type (in Terraria) that contains the target method, e.g. "Terraria.Main".</param>
         /// <param name="targetMethodName">The name of the target method.</param>
-        /// <param name="stubMethod">The stub method (in your plugin) that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethod">The stub method (in your plugin) that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(string targetTypeFullName, string targetMethodName, MethodInfo stubMethod, HPatchLocation patchLocation, int patchPriority = -1)
         {
@@ -147,8 +147,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// </summary>
         /// <param name="targetTypeFullName">The full name of target type (in Terraria) that contains the target method, e.g. "Terraria.Main".</param>
         /// <param name="targetMethodName">The name of the target method.</param>
-        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(string targetTypeFullName, string targetMethodName, string stubMethodName, HPatchLocation patchLocation, int patchPriority = -1)
         {
@@ -165,8 +165,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <param name="targetTypeFullName">The full name of target type (in Terraria) that contains the target method, e.g. "Terraria.Main".</param>
         /// <param name="targetMethodName">The name of the target method.</param>
         /// <param name="targetMethodParamCount">The number of parameters in the target method. Can be used to help discern between method overloads.</param>
-        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(string targetTypeFullName, string targetMethodName, int targetMethodParamCount, string stubMethodName, HPatchLocation patchLocation, int patchPriority = -1)
         {
@@ -197,8 +197,8 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
         /// <param name="targetMethodName">The name of the target method.</param>
         /// <param name="targetMethodParamCount">The number of parameters in the target method. Can be used to help discern between method overloads.</param>
         /// <param name="targetMethodLastParamType">The type of the target method's last parameter. Can be used to help discern between method overloads.</param>
-        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended or appended to the target method. Must be a static method!</param>
-        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix or appended as a postfix to the target method.</param>
+        /// <param name="stubMethodName">The name of the stub method IN THIS CLASS that will be either prepended onto, appended onto, or transpiled with the target method. Must be a static method!</param>
+        /// <param name="patchLocation">Whether the stub method will be prepended as a prefix, appended as a postfix, or applied as a transpiler to the target method.</param>
         /// <param name="patchPriority">The priority of this patch, as used by Harmony to order multiple patches on the same method. Patches with higher numbers go first. Set to -1 to use default priority (typically = 400).</param>
         protected void CreateHPatchOperation(string targetTypeFullName, string targetMethodName, int targetMethodParamCount, Type targetMethodLastParamType, string stubMethodName, HPatchLocation patchLocation, int patchPriority = -1)
         {
