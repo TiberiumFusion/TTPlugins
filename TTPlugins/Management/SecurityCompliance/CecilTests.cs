@@ -276,7 +276,7 @@ namespace com.tiberiumfusion.ttplugins.Management.SecurityCompliance
         /// <param name="typeDef">The <see cref="TypeDefinition"/> whose attributes will be checked.</param>
         /// <param name="testConfig">The configuration for testing the provided type.</param>
         /// <param name="messages">A list of messages to append new violation information to.</param>
-        /// <returns>True if no violations were false (pass). False otherwise (fail).</returns>
+        /// <returns>True if no violations were found (pass). False otherwise (fail).</returns>
         private static bool TestTypeAttributesForViolations(TypeDefinition typeDef, LevelTestConfiguration testConfig, List<string> messages)
         {
             bool pass = true;
@@ -348,7 +348,7 @@ namespace com.tiberiumfusion.ttplugins.Management.SecurityCompliance
         /// <param name="methodDef">The <see cref="MethodDefinition"/> whose attributes will be checked.</param>
         /// <param name="testConfig">The configuration for testing the provided type.</param>
         /// <param name="messages">A list of messages to append new violation information to.</param>
-        /// <returns>True if no violations were false (pass). False otherwise (fail).</returns>
+        /// <returns>True if no violations were found (pass). False otherwise (fail).</returns>
         private static bool TestMethodAttributesForViolations(MethodDefinition methodDef, LevelTestConfiguration testConfig, List<string> messages)
         {
             bool pass = true;
@@ -420,7 +420,7 @@ namespace com.tiberiumfusion.ttplugins.Management.SecurityCompliance
         /// <param name="typeDef">The <see cref="TypeDefinition"/> whose methods will be checked.</param>
         /// <param name="testConfig">The configuration for testing the provided type.</param>
         /// <param name="messages">A list of messages to append new violation information to.</param>
-        /// <returns>True if no violations were false (pass). False otherwise (fail).</returns>
+        /// <returns>True if no violations were found (pass). False otherwise (fail).</returns>
         private static bool TestTypeMethodsForViolations(TypeDefinition typeDef, LevelTestConfiguration testConfig, List<string> messages)
         {
             bool pass = true;
