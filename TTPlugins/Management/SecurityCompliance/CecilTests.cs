@@ -208,7 +208,7 @@ namespace com.tiberiumfusion.ttplugins.Management.SecurityCompliance
         /// <param name="typeRef">The type to be tested.</param>
         /// <param name="testConfig">The configuration for testing the provided type.</param>
         /// <param name="violations">A dictionary of the results. Only tested types with violations are present. Each violating type is keyed to a basic object describing the type of violation and if the offending type was part of generic type arguments.</param>
-        /// <returns>True if any violations were false (fail). False otherwise (pass).</returns>
+        /// <returns>True if any violations were found (fail). False otherwise (pass).</returns>
         private static bool IsTypeRestricted(TypeReference typeRef, LevelTestConfiguration testConfig, out Dictionary<TypeReference, TypeViolations> violations)
         {
             violations = new Dictionary<TypeReference, TypeViolations>();
