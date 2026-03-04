@@ -538,7 +538,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             {
                 Terraria.UI.Chat.TextSnippet message = new Terraria.UI.Chat.TextSnippet(text);
                 Terraria.UI.Chat.TextSnippet[] snippets = new Terraria.UI.Chat.TextSnippet[] { message };
-                Terraria.UI.Chat.ChatManager.ConvertNormalSnippets(snippets);
+                Terraria.UI.Chat.ChatManager.ConvertNormalSnippets(snippets.ToList());
 
                 int dummy = 0;
                 FixedDrawColorCodedString(Terraria.Main.spriteBatch, relogicDynamicSpriteFont, snippets,
@@ -563,7 +563,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
             {
                 Terraria.UI.Chat.TextSnippet message = new Terraria.UI.Chat.TextSnippet(text);
                 Terraria.UI.Chat.TextSnippet[] snippets = new Terraria.UI.Chat.TextSnippet[] { message };
-                Terraria.UI.Chat.ChatManager.ConvertNormalSnippets(snippets);
+                Terraria.UI.Chat.ChatManager.ConvertNormalSnippets(snippets.ToList());
 
                 Color useShadowColor = shadowColor ?? new Color(0, 0, 0, 255);
                 useShadowColor.A = baseColor.A;
@@ -678,12 +678,13 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 for (int i = 0; i < snippets.Length; i++)
                 {
                     Terraria.UI.Chat.TextSnippet textSnippet = snippets[i];
-                    textSnippet.Update();
+                    //textSnippet.Update(); // was an empty stub in 1.4.4.9, removed in 1.4.5
                     if (!ignoreColors)
                     {
                         color = textSnippet.GetVisibleColor();
                     }
-                    num2 = textSnippet.Scale;
+                    //num2 = textSnippet.Scale; // 1.4.5 removes Scale property
+                    num2 = 1f;
                     Vector2 size;
                     if (textSnippet.UniqueDraw(false, out size, spriteBatch, vector, color, num2))
                     {
@@ -733,7 +734,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                             {
                                 num3 = num2;
                             }
-                            RelogicDyanmicSpriteFront_DrawString(spriteBatch, relogicDynamicSpriteFont, array2[k], vector, color, rotation, origin, baseScale * textSnippet.Scale * num2, SpriteEffects.None, 0f);
+                            RelogicDynamicSpriteFront_DrawString(spriteBatch, relogicDynamicSpriteFont, array2[k], vector, color, rotation, origin, baseScale * num2, SpriteEffects.None, 0f);
                             Vector2 value = relogicDynamicSpriteFont.MeasureString(array2[k]);
                             if (FixedDrawColorCodedString_Between(vec, vector, vector + value))
                             {
@@ -772,7 +773,7 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 return false;
             }
             private static Dictionary<dynamic, MethodInfo> CachedInternalDrawMethodInfos = new Dictionary<dynamic, MethodInfo>();
-            private static void RelogicDyanmicSpriteFront_DrawString(SpriteBatch spriteBatch, dynamic spriteFont, string text, Vector2 position, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
+            private static void RelogicDynamicSpriteFront_DrawString(SpriteBatch spriteBatch, dynamic spriteFont, string text, Vector2 position, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
             {
                 Type TypeSpriteFont = spriteFont.GetType();
 
