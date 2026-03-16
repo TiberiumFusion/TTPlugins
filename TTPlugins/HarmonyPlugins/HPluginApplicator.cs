@@ -206,6 +206,16 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 XElement configDocBase = pluginAssembliesConfig.Element("Base");
                 DLog("done", false);
 
+                // Get plugin mode config
+                DLog("Reading PluginDebugMode from config...");
+                PluginDebugMode = bool.Parse(configDocBase.Element("PluginDebugMode")?.Value ?? "false");
+                DLog("done, PluginDebugMode is: " + PluginDebugMode, false);
+
+                // Get security level indicator
+                DLog("Reading PluginSecurityLevel from config...");
+                SecurityLevel = int.Parse(configDocBase.Element("PluginSecurityLevel")?.Value ?? "1");
+                DLog("done, PluginSecurityLevel is: " + SecurityLevel, false);
+
                 // Add the gac assemblies specified in the config doc to a store list
                 DLog("Storing common assembly names from plugin compile time (most likely sourced from the gac)...");
                 XElement GACAssembliesToLoad = configDocBase.Element("GACAssembliesToLoad");
@@ -299,16 +309,6 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                 if (PluginDebugMode)
                     EmbeddedCecilPdbAssembly = Assembly.Load(cecilPdbAsmDisplayName);
                 DLog("done", false);
-
-                // Get plugin mode config
-                DLog("Reading PluginDebugMode from config...");
-                PluginDebugMode = bool.Parse(configDocBase.Element("PluginDebugMode")?.Value ?? "false");
-                DLog("done, PluginDebugMode is: " + PluginDebugMode, false);
-
-                // Get security level indicator
-                DLog("Reading PluginSecurityLevel from config...");
-                SecurityLevel = int.Parse(configDocBase.Element("PluginSecurityLevel")?.Value ?? "1");
-                DLog("done, PluginSecurityLevel is: " + SecurityLevel, false);
 
                 // Extract the plugin assemblies specified in the config doc
                 ExtractedPluginAssemblyPaths.Clear();
