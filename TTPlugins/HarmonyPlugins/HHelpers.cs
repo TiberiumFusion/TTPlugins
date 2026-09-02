@@ -612,14 +612,19 @@ namespace com.tiberiumfusion.ttplugins.HarmonyPlugins
                     _lineSpacingTarget.SetValue(sfont, (int)_lineSpacingSource.GetValue(RLSFont));
                     DefaultCharacterTarget.SetValue(sfont, (char)DefaultCharacterSource.GetValue(RLSFont));
                     object _spriteCharactersSource_Value = _spriteCharactersSource.GetValue(RLSFont);
-                    IDictionary _spriteCharactersSource_ValueAsIDictionary = (IDictionary)_spriteCharactersSource_Value;
+                    object[] _spriteCharactersSource_ValueAsObjectArr = (object[])_spriteCharactersSource_Value;
+                    _spriteCharactersTarget.SetValue(sfont, Array.CreateInstance(_defaultCharacterDataTarget.FieldType, _spriteCharactersSource_ValueAsObjectArr.Length));
                     object _spriteCharactersTarget_Value = _spriteCharactersTarget.GetValue(sfont);
-                    IDictionary _spriteCharactersTarget_ValueAsIDictionary = (IDictionary)_spriteCharactersTarget_Value;
+                    object[] _spriteCharactersTarget_ValueAsObjectArr = (object[])_spriteCharactersTarget_Value;
 
-                    foreach (char key in _spriteCharactersSource_ValueAsIDictionary.Keys)
+                    for (int i = 0; i < _spriteCharactersSource_ValueAsObjectArr.Length; i++)
                     {
-                        object spriteCharacterDataNew = _spriteCharactersSource_ValueAsIDictionary[key];
-                        _spriteCharactersTarget_ValueAsIDictionary[key] = TypeConvertFix_SpriteCharacterData(spriteCharacterDataNew, TypeSpriteCharacterDataTarget);
+                        object spriteCharacterDataSrc = _spriteCharactersSource_ValueAsObjectArr[i];
+                        if (spriteCharacterDataSrc != null)
+                        {
+                            object spriteCharacterDataFixed = TypeConvertFix_SpriteCharacterData(spriteCharacterDataSrc, TypeSpriteCharacterDataTarget);
+                            _spriteCharactersTarget_ValueAsObjectArr[i] = spriteCharacterDataFixed;
+                        }
                     }
                     _defaultCharacterDataTarget.SetValue(sfont, TypeConvertFix_SpriteCharacterData(_defaultCharacterDataSource.GetValue(RLSFont), TypeSpriteCharacterDataTarget));
 
